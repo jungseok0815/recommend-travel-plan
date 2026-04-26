@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import APIRouter
 from app.domain.recommend.services.recommend import get_travel_recommend
 
-app = FastAPI()
+router = APIRouter()
 
-@app.get("/travel/recommend")
-def
+@router.get("/travel/recommend")
+def travel_recommend():
+    return get_travel_recommend()
