@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from app.core.security import decode_access_token
@@ -5,6 +6,13 @@ from app.domain.user.routers.userRouter import router as user_router
 
 app = FastAPI()
 app.include_router(user_router)  # 추가
+
+
+logging.basicConfig(
+  level=logging.INFO,
+  format="%(asctime)s %(levelname)s %(name)s - %(message)s"
+)
+
 
 @app.get("/")
 def root():
@@ -32,4 +40,5 @@ async def auth_middleware(request: Request, call_next):
     if payload is None:
       return JSONResponse(status_code=401, content={"detail": "유효하지 않은 토큰입니다"})
 
+    request.state.user_id = payload.get("sub")
     return await call_next(request)
