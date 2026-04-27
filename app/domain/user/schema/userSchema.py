@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class UserCreate(BaseModel):    # POST /user/signup 요청 body
+class UserCreate(BaseModel):
     email: str
     password: str
     address: str
@@ -18,3 +18,4 @@ class UserResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+    refresh_token : str

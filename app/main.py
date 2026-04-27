@@ -27,6 +27,7 @@ PUBLIC_PATHS = [
       "/",
       "/user/login",
       "/user/signup",
+      "/user/token/refresh",
 ]
 
 @app.middleware("http")

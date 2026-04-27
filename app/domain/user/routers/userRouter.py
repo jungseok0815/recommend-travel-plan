@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.domain.user.schema.userSchema import UserCreate, UserLogin
-from app.domain.user.services.userService import create_user, login_user, select_user
+from app.domain.user.schema.userSchema import TokenResponse
+from app.domain.user.services.userService import create_user, login_user, select_user, logout_user, refresh_access_token
 
 logger = logging.getLogger(__name__)
 
@@ -24,3 +25,17 @@ def select(request: Request, db: Session = Depends(get_db)):
     user_id = request.state.user_id
     logger.info(f"유저 조회 요청 - user_id: {user_id}")
     return select_user(db, int(user_id))
+
+@router.post("/logout")
+def logout(request: Request):
+    user_id = request.state.user_id
+    logger.info(f"로그아웃 요청 - user_id: {user_id}")
+    logout_user(int(user_id))
+    return {"message": "로그아웃 되었습니다"}
+
+@router.post("/token/refresh")
+def token_refresh(request: Request) -> TokenResponse:
+    authorization = request.headers.get("Authorization")
+    refresh_token = authorization.split(" ")[1]
+    logger.info("토큰 갱신 요청")
+    return refresh_access_token(refresh_token)
