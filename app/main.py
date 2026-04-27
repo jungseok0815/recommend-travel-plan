@@ -1,7 +1,7 @@
 import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from app.core.security import decode_token
+from app.core.security import decode_token, create_access_token
 from app.domain.user.routers.userRouter import router as user_router
 from app.domain.trip.routers.tripRouter import router as trip_router
 from app.domain.preference.routers.preferenceRouter import router as preference_router
@@ -43,17 +43,35 @@ async def auth_middleware(request: Request, call_next):
     access_token = authorization.split(" ")[1]
     refresh_token = request.headers.get("Refresh-Token")
 
-    result = decode_token(token)
+    access_result = decode_token(access_token)
 
-    if result["status"] == "valid":
+    if access_result["status"] == "valid":
         request.state.user_id = result["payload"].get("sub")
         return await call_next(request)
 
-    if result["status"] == "expired":
-        return JSONResponse(status_code=401,content={"detail": "토큰이 만료되었습니다", "code": "TOKEN_EXPIRED"})
-
     if result["status"] == "invalid":
         return JSONResponse(status_code=401,content={"detail": "유효하지 않은 토큰입니다", "code": "TOKEN_INVALID"})
+
+    if access_result["status"] == "expired":
+        if not refresh_token:
+            return JSONResponse(status_code=401, content={"detail" : "재로그인이 필요합니다"})
+        refresh_result = decode_token(refresh_token)
+
+        if refresh_result["status"] != "valid":
+            return JSONResponse(status_code=401, content={"detail" : "유효하지 않은 토큰입니다", "code": "TOKEN_INVALID"})
+
+        user_id = refresh_result["payload"].get("sub")
+        new_access_token = create_access_token({"sub" : user_id})
+        request.status.user_id = user_id
+        responses = await call_next(request)
+
+
+
+
+
+
+
+
 
     request.state.user_id = payload.get("sub")
     return await call_next(request)
