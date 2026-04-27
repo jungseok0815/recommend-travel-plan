@@ -4,10 +4,12 @@ from fastapi.responses import JSONResponse
 from app.core.security import decode_access_token
 from app.domain.user.routers.userRouter import router as user_router
 from app.domain.trip.routers.tripRouter import router as trip_router
+from app.domain.preference.routers.preferenceRouter import router as preference_router
 
 app = FastAPI()
 app.include_router(user_router)
 app.include_router(trip_router)
+app.include_router(preference_router)
 
 
 logging.basicConfig(
