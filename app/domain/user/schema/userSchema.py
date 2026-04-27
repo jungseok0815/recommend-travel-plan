@@ -13,3 +13,8 @@ class UserResponse(BaseModel):
     id: int
     email: str
     address: str
+    model_config = {"from_attributes": True}
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str

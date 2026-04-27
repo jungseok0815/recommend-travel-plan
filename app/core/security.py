@@ -12,5 +12,5 @@ def decode_access_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithm=[ALGORITHM])
         return payload
-    except JWError
+    except JWError:
         return None
