@@ -39,3 +39,4 @@ def token_refresh(request: Request) -> TokenResponse:
     refresh_token = authorization.split(" ")[1]
     logger.info("토큰 갱신 요청")
     return refresh_access_token(refresh_token)
+

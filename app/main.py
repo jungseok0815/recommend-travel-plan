@@ -1,7 +1,7 @@
 import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from app.core.security import decode_access_token
+from app.core.security import decode_token
 from app.domain.user.routers.userRouter import router as user_router
 from app.domain.trip.routers.tripRouter import router as trip_router
 from app.domain.preference.routers.preferenceRouter import router as preference_router
@@ -40,10 +40,20 @@ async def auth_middleware(request: Request, call_next):
     if not authorization or not authorization.startswith("Bearer "):
          return JSONResponse(status_code=401, content={"detail": "토큰이 없습니다"})
 
-    token = authorization.split(" ")[1]
-    payload = decode_access_token(token)
-    if payload is None:
-      return JSONResponse(status_code=401, content={"detail": "유효하지 않은 토큰입니다"})
+    access_token = authorization.split(" ")[1]
+    refresh_token = request.headers.get("Refresh-Token")
+
+    result = decode_token(token)
+
+    if result["status"] == "valid":
+        request.state.user_id = result["payload"].get("sub")
+        return await call_next(request)
+
+    if result["status"] == "expired":
+        return JSONResponse(status_code=401,content={"detail": "토큰이 만료되었습니다", "code": "TOKEN_EXPIRED"})
+
+    if result["status"] == "invalid":
+        return JSONResponse(status_code=401,content={"detail": "유효하지 않은 토큰입니다", "code": "TOKEN_INVALID"})
 
     request.state.user_id = payload.get("sub")
     return await call_next(request)
