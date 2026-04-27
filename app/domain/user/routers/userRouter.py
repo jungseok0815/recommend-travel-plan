@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from app.domain.recommend.services.recommend import get_travel_recommend
 
-router = APIRouter()
+router = APIRouter(prefix="/user")
 
-@router.get("/travel/user")
-def travel_recommend():
-    return get_travel_recommend()
+@router.get("/signup")
+def signup(user_data: UserCreate,  db: Session = Depends(get_db)):
+    return create_user(db, user_data)
