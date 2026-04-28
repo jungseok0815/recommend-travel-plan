@@ -20,6 +20,11 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
     logger.info(f"로그인 요청 - email: {user_data.email}")
     return login_user(db, user_data)
 
+@router.post("/get")
+def login(user_data: UserLogin, db: Session = Depends(get_db)):
+    logger.info(f"로그인 요청 - email: {user_data.email}")
+    return login_user(db, user_data)
+
 @router.get("/me")
 def select(request: Request, db: Session = Depends(get_db)):
     user_id = request.state.user_id
