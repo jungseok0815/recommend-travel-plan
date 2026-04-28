@@ -13,3 +13,6 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 NAVER_CLIENT_ID     = os.getenv("NAVER_CLIENT_ID", "")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "")
 NAVER_REDIRECT_URI  = os.getenv("NAVER_REDIRECT_URI", "")
+
+KAKAO_CLIENT_ID    = os.getenv("KAKAO_CLIENT_ID", "")
+KAKAO_REDIRECT_URI = os.getenv("KAKAO_REDIRECT_URI", "")
