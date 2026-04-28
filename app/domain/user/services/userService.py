@@ -2,11 +2,11 @@ import logging
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.domain.user.models.userModel import User
+from app.domain.user.models.socialAccountModel import SocialAccount
 from app.domain.user.schema.userSchema import UserCreate, UserLogin, UserResponse, TokenResponse
 from app.utils.hash import hash_password, verify_password
-from app.core.security import create_access_token, create_refresh_token, decode_token
-from app.db.redis import set_refresh_token, get_refresh_token, delete_refresh_token
-from app.core.config import NAVER_CLIENT_ID,NAVER_CLIENT_SECRET, NAVER_REDIRECT_URI
+from app.core.security import create_access_token, create_refresh_token
+from app.db.redis import set_refresh_token, delete_refresh_token
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +51,27 @@ def select_user(db: Session, user_id: int) -> UserResponse:
     if user is None:
         raise HTTPException(status_code=404, detail="유저를 찾을 수 없습니다")
 
+    return user
+
+def get_or_create_social_user(db: Session, email: str, provider: str, provider_id: str) -> User:
+    social = db.query(SocialAccount).filter(
+        SocialAccount.provider    == provider,
+        SocialAccount.provider_id == provider_id
+    ).first()
+
+    if social:
+        return social.user
+
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        user = User(email=email, password=None, address=None)
+        db.add(user)
+        db.flush()
+
+    social = SocialAccount(user_id=user.id, provider=provider, provider_id=provider_id)
+    db.add(social)
+    db.commit()
+    db.refresh(user)
     return user
 
 

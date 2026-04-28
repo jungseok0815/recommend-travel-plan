@@ -30,6 +30,8 @@ PUBLIC_PATHS = [
       "/user/login",
       "/user/signup",
       "/user/token/refresh",
+      "/user/auth/naver",
+      "/user/auth/naver/callback"
 ]
 
 @app.middleware("http")
