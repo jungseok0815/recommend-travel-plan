@@ -21,6 +21,6 @@ def decode_token(token: str):
       return {"status": "valid", "payload": payload}
     except ExpiredSignatureError:
       return {"status": "expired"}
-    except JWTError::
+    except JWTError:
       return {"status": "invalid"}
 
