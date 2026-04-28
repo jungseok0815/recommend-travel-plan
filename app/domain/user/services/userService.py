@@ -6,6 +6,7 @@ from app.domain.user.schema.userSchema import UserCreate, UserLogin, UserRespons
 from app.utils.hash import hash_password, verify_password
 from app.core.security import create_access_token, create_refresh_token, decode_token
 from app.db.redis import set_refresh_token, get_refresh_token, delete_refresh_token
+from app.core.config import NAVER_CLIENT_ID,NAVER_CLIENT_SECRET, NAVER_REDIRECT_URI
 
 logger = logging.getLogger(__name__)
 
@@ -51,3 +52,9 @@ def select_user(db: Session, user_id: int) -> UserResponse:
         raise HTTPException(status_code=404, detail="유저를 찾을 수 없습니다")
 
     return user
+
+
+
+
+
+
