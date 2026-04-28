@@ -42,26 +42,6 @@ def logout_user(user_id: int):
     logger.info(f"로그아웃 - user_id: {user_id}")
     delete_refresh_token(user_id)
 
-def refresh_access_token(token: str) -> TokenResponse:
-    logger.info("access_token 갱신 요청")
-    payload = decode_access_token(token)
-
-    if payload is None:
-        raise HTTPException(status_code=401, detail="유효하지 않은 refresh token입니다")
-
-    user_id = payload.get("sub")
-    saved_token = get_refresh_token(int(user_id))
-
-    if saved_token != token:
-        raise HTTPException(status_code=401, detail="만료되었거나 유효하지 않은 refresh token입니다")
-
-    new_access_token  = create_access_token(data={"sub": user_id})
-    new_refresh_token = create_refresh_token(data={"sub": user_id})
-
-    set_refresh_token(int(user_id), new_refresh_token)
-
-    return TokenResponse(access_token=new_access_token, refresh_token=new_refresh_token, token_type="bearer")
-
 
 def select_user(db: Session, user_id: int) -> UserResponse:
     logger.info(f"유저 조회 - user_id: {user_id}")

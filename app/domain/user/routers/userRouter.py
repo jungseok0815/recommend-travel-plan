@@ -33,10 +33,4 @@ def logout(request: Request):
     logout_user(int(user_id))
     return {"message": "로그아웃 되었습니다"}
 
-@router.post("/token/refresh")
-def token_refresh(request: Request) -> TokenResponse:
-    authorization = request.headers.get("Authorization")
-    refresh_token = authorization.split(" ")[1]
-    logger.info("토큰 갱신 요청")
-    return refresh_access_token(refresh_token)
 
