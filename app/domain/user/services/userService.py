@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from app.domain.user.models.userModel import User
 from app.domain.user.schema.userSchema import UserCreate, UserLogin, UserResponse, TokenResponse
 from app.utils.hash import hash_password, verify_password
-from app.core.security import create_access_token, create_refresh_token, decode_access_token
+from app.core.security import create_access_token, create_refresh_token, decode_token
 from app.db.redis import set_refresh_token, get_refresh_token, delete_refresh_token
 
 logger = logging.getLogger(__name__)
@@ -41,7 +41,6 @@ def login_user(db: Session, user_data: UserLogin) -> TokenResponse:
 def logout_user(user_id: int):
     logger.info(f"로그아웃 - user_id: {user_id}")
     delete_refresh_token(user_id)
-
 
 def refresh_access_token(token: str) -> TokenResponse:
     logger.info("access_token 갱신 요청")
