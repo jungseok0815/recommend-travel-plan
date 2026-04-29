@@ -17,3 +17,5 @@ NAVER_REDIRECT_URI  = os.getenv("NAVER_REDIRECT_URI", "")
 
 KAKAO_CLIENT_ID    = os.getenv("KAKAO_CLIENT_ID", "")
 KAKAO_REDIRECT_URI = os.getenv("KAKAO_REDIRECT_URI", "")
+
+TOUR_API_KEY = os.getenv("TOUR_API_KEY", "")
