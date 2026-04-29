@@ -1,7 +1,7 @@
 import logging
 import httpx
 from app.core.config import TOUR_API_KEY
-from app.external.tour_api_constants import BASE_URL, Endpoint, ContentType, AreaCode
+from app.external.tour_api.tour_api_constants import BASE_URL, Endpoint, ContentType, AreaCode
 
 logger = logging.getLogger(__name__)
 
