@@ -39,7 +39,9 @@ def _get(endpoint: str, params: dict) -> dict:
     return response.json()
 
 
-
+"""
+ 지역별 조회
+"""
 def get_spots_by_area(area_name: str, content_type: str ="관광지", num_of_row: int = 50) -> list[dict]:
     logging.info("get_spots_by_area")
     area_code = AREA_CODE.get(area_name)
@@ -60,7 +62,33 @@ def get_spots_by_area(area_name: str, content_type: str ="관광지", num_of_row
         return []
 
     return items.get("item",[])    
-    
 
-    
-    
+"""
+키워드 검색
+"""
+def search_spots_by_keyword(keyword: str, area_name: str | None = None, num_of_rows: int = 10) -> list[dict]:
+    params = {
+        "keyword"   : keyword,
+        "numOfRows" : num_of_rows,
+        "pageNo"    : 1,
+    }
+
+    if area_name is not None: 
+        arae_code = AREA_CODE.get(area_name)
+        if arae_code:
+            params["area_code"] =arae_code
+        
+    data = _get("searchKeyword1", data)
+
+    items = data.get("response", {}).get("body", {}).get("items", {})
+
+    if not items:
+        return []
+    return items.get("item", [])
+
+"""
+관광지 상세 조회
+"""   
+def get_spot_detail() -> list[dict]: 
+
+    return None
