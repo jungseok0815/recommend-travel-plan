@@ -2,7 +2,7 @@ import logging
 import httpx
 from app.core.config import TOUR_API_KEY
 
-BaseUrl = "https://apis.data.go.kr/B551011/KorService1"
+BaseUrl = "https://apis.data.go.kr/B551011/KorService2"
 
 COMMON_PARAMS = {
     "serviceKey" : TOUR_API_KEY,
@@ -49,8 +49,8 @@ def get_spots_by_area(area_name: str, content_type: str ="관광지", num_of_row
         logging.info(f"알 수 없는 지역명: {area_name}")
         return []
     
-    data = _get("areaBasedList1",{
-        "areacode" : area_code,
+    data = _get("areaBasedList2",{
+        "areaCode" : area_code,
         "contentTypeId" : CONTENT_TYPE.get(content_type, "12"),
         "numOfRows"     : num_of_row,
         "pageNo"        : 1,
