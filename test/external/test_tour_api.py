@@ -1,4 +1,4 @@
-from app.external.tour_api import get_spots_by_area,get_spot_detail,search_spots_by_keyword
+from app.external.tour_api import get_spots_by_category,get_spots_by_area,get_spot_detail,search_spots_by_keyword
 ## test 실행방법 
 ## pytest test/external/test_tour_api.py -v -s
 
@@ -17,7 +17,7 @@ def test_search_spots_by_keyword():
     print(result)
     assert len(result) > 0
 
-test_search_spots_by_keyword()
+# test_search_spots_by_keyword()
 
 def test_get_spot_detail():
     contentId = 600584
@@ -27,6 +27,17 @@ def test_get_spot_detail():
     assert len(result) > 0
 
 # test_get_spot_detail()
+
+def test_get_spots_by_category():
+    area_name="제주"
+    iclsSystml="FD"
+    result = get_spots_by_category(area_name, iclsSystml)
+    print(result)
+    assert len(result) > 0
+
+# test_get_spots_by_category()
+
+
 
 
 

@@ -72,14 +72,20 @@ def get_spot_detail(content_id: str, content_type_id: str) -> dict:
     item_list = items.get("item", [])
     return item_list[0] if item_list else {}
 
-
-def get_tourist_spots(area_name: str, num_of_rows: int = 50) -> list[dict]:
-    return get_spots_by_area(area_name, content_type="관광지", num_of_rows=num_of_rows)
-
-
-def get_accommodations(area_name: str, num_of_rows: int = 50) -> list[dict]:
-    return get_spots_by_area(area_name, content_type="숙박", num_of_rows=num_of_rows)
-
-
-def get_restaurants(area_name: str, num_of_rows: int = 50) -> list[dict]:
-    return get_spots_by_area(area_name, content_type="음식점", num_of_rows=num_of_rows)
+def get_spots_by_category(area_name: str, lclsSystm1: str, num_of_rows: int = 50) -> list[dict]:
+    arae_code  = getattr(AreaCode, area_name, None)
+    if not arae_code:
+        logger.warning(f"알수없는 지역명:{area_name}")
+    
+    params = {
+        "areaCode" : arae_code,
+        "lclsSystm1" : lclsSystm1,
+        "numOfRows" : num_of_rows,
+        "pageNo" : 1,
+    }
+    data = _get(Endpoint.AREA_BASED_LIST, params)
+    items = data.get("response", {}).get("body", {}).get("items", {})
+    if not items:
+        return {}
+    item_list = items.get("item", [])
+    return item_list[0] if item_list else {}
