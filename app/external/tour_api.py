@@ -78,7 +78,7 @@ def search_spots_by_keyword(keyword: str, area_name: str | None = None, num_of_r
         if arae_code:
             params["area_code"] =arae_code
         
-    data = _get("searchKeyword1", data)
+    data = _get("searchKeyword1", params)
 
     items = data.get("response", {}).get("body", {}).get("items", {})
 
@@ -89,6 +89,15 @@ def search_spots_by_keyword(keyword: str, area_name: str | None = None, num_of_r
 """
 관광지 상세 조회
 """   
-def get_spot_detail() -> list[dict]: 
+def get_spot_detail(contentId :int=600584, contentType:int =12) -> list[dict]: 
+    params = {
+        "contentId" : contentId,
+        "contentTypeId" : contentType
+    }
+    data = _get("detailIntro2",params)
 
-    return None
+    items = data.get("response", {}).get("body", {}).get("items", {})
+    
+    if not items:
+        return []
+    return items.get("item", [])
