@@ -1,8 +1,9 @@
 import logging
 import httpx
 from app.core.config import TOUR_API_KEY
+from app.external.tour_api_constants import BASE_URL, Endpoint, ContentType, AreaCode
 
-BaseUrl = "https://apis.data.go.kr/B551011/KorService2"
+logger = logging.getLogger(__name__)
 
 COMMON_PARAMS = {
     "serviceKey" : TOUR_API_KEY,
@@ -11,61 +12,34 @@ COMMON_PARAMS = {
     "_type"      : "json",
 }
 
-CONTENT_TYPE = {
-    "관광지"  : "12",
-    "문화시설": "14",
-    "축제행사": "15",
-    "레포츠"  : "28",
-    "숙박"    : "32",
-    "쇼핑"    : "38",
-    "음식점"  : "39",
-}
-
-AREA_CODE = {
-    "서울": "1",  "인천": "2",  "대전": "3",
-    "대구": "4",  "광주": "5",  "부산": "6",
-    "울산": "7",  "세종": "8",  "경기": "31",
-    "강원": "32", "충북": "33", "충남": "34",
-    "전북": "35", "전남": "36", "경북": "37",
-    "경남": "38", "제주": "39",
-}
-
 
 def _get(endpoint: str, params: dict) -> dict:
-    url = f"{BaseUrl}/{endpoint}"
+    url = f"{BASE_URL}/{endpoint}"
     merged = {**COMMON_PARAMS, **params}
     response = httpx.get(url, params=merged, timeout=10)
     response.raise_for_status()
     return response.json()
 
 
-"""
- 지역별 조회
-"""
-def get_spots_by_area(area_name: str, content_type: str ="관광지", num_of_row: int = 50) -> list[dict]:
-    logging.info("get_spots_by_area")
-    area_code = AREA_CODE.get(area_name)
-    if not area_code :
-        logging.info(f"알 수 없는 지역명: {area_name}")
+def get_spots_by_area(area_name: str, content_type: str = "관광지", num_of_rows: int = 50) -> list[dict]:
+    area_code = getattr(AreaCode, area_name, None)
+    if not area_code:
+        logger.warning(f"알 수 없는 지역명: {area_name}")
         return []
-    
-    data = _get("areaBasedList2",{
-        "areaCode" : area_code,
-        "contentTypeId" : CONTENT_TYPE.get(content_type, "12"),
-        "numOfRows"     : num_of_row,
+
+    data = _get(Endpoint.AREA_BASED_LIST, {
+        "areaCode"      : area_code,
+        "contentTypeId" : getattr(ContentType, content_type, ContentType.관광지),
+        "numOfRows"     : num_of_rows,
         "pageNo"        : 1,
     })
 
     items = data.get("response", {}).get("body", {}).get("items", {})
-    
     if not items:
         return []
+    return items.get("item", [])
 
-    return items.get("item",[])    
 
-"""
-키워드 검색
-"""
 def search_spots_by_keyword(keyword: str, area_name: str | None = None, num_of_rows: int = 10) -> list[dict]:
     params = {
         "keyword"   : keyword,
@@ -73,31 +47,39 @@ def search_spots_by_keyword(keyword: str, area_name: str | None = None, num_of_r
         "pageNo"    : 1,
     }
 
-    if area_name is not None: 
-        arae_code = AREA_CODE.get(area_name)
-        if arae_code:
-            params["area_code"] =arae_code
-        
-    data = _get("searchKeyword1", params)
+    if area_name:
+        area_code = getattr(AreaCode, area_name, None)
+        if area_code:
+            params["areaCode"] = area_code
+
+    data = _get(Endpoint.SEARCH_KEYWORD, params)
 
     items = data.get("response", {}).get("body", {}).get("items", {})
-
     if not items:
         return []
     return items.get("item", [])
 
-"""
-관광지 상세 조회
-"""   
-def get_spot_detail(contentId :int=600584, contentType:int =12) -> list[dict]: 
-    params = {
-        "contentId" : contentId,
-        "contentTypeId" : contentType
-    }
-    data = _get("detailIntro2",params)
+
+def get_spot_detail(content_id: str, content_type_id: str) -> dict:
+    data = _get(Endpoint.DETAIL_INTRO, {
+        "contentId"     : content_id,
+        "contentTypeId" : content_type_id,
+    })
 
     items = data.get("response", {}).get("body", {}).get("items", {})
-    
     if not items:
-        return []
-    return items.get("item", [])
+        return {}
+    item_list = items.get("item", [])
+    return item_list[0] if item_list else {}
+
+
+def get_tourist_spots(area_name: str, num_of_rows: int = 50) -> list[dict]:
+    return get_spots_by_area(area_name, content_type="관광지", num_of_rows=num_of_rows)
+
+
+def get_accommodations(area_name: str, num_of_rows: int = 50) -> list[dict]:
+    return get_spots_by_area(area_name, content_type="숙박", num_of_rows=num_of_rows)
+
+
+def get_restaurants(area_name: str, num_of_rows: int = 50) -> list[dict]:
+    return get_spots_by_area(area_name, content_type="음식점", num_of_rows=num_of_rows)
