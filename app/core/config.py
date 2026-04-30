@@ -38,3 +38,8 @@ KAKAO_MOBILITY_API_KEY = os.getenv("KAKAO_MOBILITY_API_KEY", "")
 앤트로픽 ai agent api
 """
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+
+"""
+구글 제미나이 api
+"""
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
