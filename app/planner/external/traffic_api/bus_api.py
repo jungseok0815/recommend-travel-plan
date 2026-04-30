@@ -1,0 +1,45 @@
+import logging
+import httpx
+from app.core.config import TOUR_API_KEY
+from app.planner.external.traffic_api.bus_api_constants import BASE_URL, Endpoint, TerminalCode
+
+logger = logging.getLogger(__name__)
+
+COMMON_PARAMS = {
+    "serviceKey": TOUR_API_KEY,
+    "_type":      "json",
+}
+
+
+def _get(endpoint: str, params: dict) -> dict:
+    url = f"{BASE_URL}/{endpoint}"
+    merged = {**COMMON_PARAMS, **params}
+    response = httpx.get(url, params=merged, timeout=10)
+    response.raise_for_status()
+    return response.json()
+
+
+def get_bus_routes(dep_terminal_name: str, arr_terminal_name: str, date: str) -> list[dict]:
+    """
+    출발/도착 터미널명으로 고속버스 노선 조회
+    date 형식: YYYYMMDD (예: 20250501)
+    """
+    dep_code = getattr(TerminalCode, dep_terminal_name, None)
+    arr_code = getattr(TerminalCode, arr_terminal_name, None)
+
+    if not dep_code or not arr_code:
+        logger.warning(f"알 수 없는 터미널명: {dep_terminal_name} -> {arr_terminal_name}")
+        return []
+
+    data = _get(Endpoint.ROUTE_LIST, {
+        "depTerminalId": dep_code,
+        "arrTerminalId": arr_code,
+        "depPlandTime":  date,
+        "numOfRows":     20,
+        "pageNo":        1,
+    })
+
+    items = data.get("response", {}).get("body", {}).get("items", {})
+    if not items:
+        return []
+    return items.get("item", [])
