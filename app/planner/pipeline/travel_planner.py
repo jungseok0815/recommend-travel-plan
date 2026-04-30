@@ -1,4 +1,5 @@
 import json
+import re
 # import anthropic
 # from app.core.config import ANTHROPIC_API_KEY
 from google import genai
@@ -19,12 +20,12 @@ DEFAULT_SYSTEM_PROMPT = """
 타임라인 형식으로 제공해주세요
 """
 
-def plan_travel(area_name: str, startDate: str, endDate : str, address:str) -> dict:
+def plan_travel(area_name: str, startDate: str, endDate: str, address: str, transport_mode: str) -> dict:
     # 1. 데이터 수집
     data = collect_travel_data(area_name)
 
     # 2. 프롬프트 생성
-    prompt = build_prompt(area_name, startDate, endDate, address, data)
+    prompt = build_prompt(area_name, startDate, endDate, address, transport_mode, data)
 
     # Anthropic 단건 호출 (주석 처리)
     # response = client.messages.create(
@@ -42,5 +43,6 @@ def plan_travel(area_name: str, startDate: str, endDate : str, address:str) -> d
     )
     final_text = response.text
 
-    cleaned = final_text.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+    match = re.search(r"```json\s*(.*?)\s*```", final_text, re.DOTALL)
+    cleaned = match.group(1) if match else final_text.strip()
     return json.loads(cleaned)

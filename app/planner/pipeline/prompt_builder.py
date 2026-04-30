@@ -1,12 +1,13 @@
 import json
 
-def build_prompt(area_name: str, startDate: str, endDate: str, address: str, data: dict) -> str:
+def build_prompt(area_name: str, startDate: str, endDate: str, address: str, transport_mode: str, data: dict) -> str:
     return f"""
             여행 조건:
             - 지역: {area_name}
             - 출발장소 : {address}
+            - 이동방식 : {transport_mode}
             - 시작일 : {startDate}
-            - 좋료일 : {endDate}
+            - 종료일 : {endDate}
 
             관광지 목록:
             {json.dumps(data["attractions"], ensure_ascii=False)}
