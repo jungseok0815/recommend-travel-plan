@@ -1,7 +1,7 @@
 import logging
 import httpx
 from app.core.config import TOUR_API_KEY
-from app.planner.external.traffic_api.bus_api_constants import BASE_URL, Endpoint, TerminalCode
+from app.planner.external.traffic_api.bus_api_constants import BASE_URL, SCHEDULE_PATH, TerminalId
 
 logger = logging.getLogger(__name__)
 
@@ -11,8 +11,8 @@ COMMON_PARAMS = {
 }
 
 
-def _get(endpoint: str, params: dict) -> dict:
-    url = f"{BASE_URL}/{endpoint}"
+def _get(path: str, params: dict) -> dict:
+    url = f"{BASE_URL}/{path}"
     merged = {**COMMON_PARAMS, **params}
     response = httpx.get(url, params=merged, timeout=10)
     response.raise_for_status()
@@ -21,19 +21,19 @@ def _get(endpoint: str, params: dict) -> dict:
 
 def get_bus_routes(dep_terminal_name: str, arr_terminal_name: str, date: str) -> list[dict]:
     """
-    출발/도착 터미널명으로 고속버스 노선 조회
+    출발/도착 터미널명으로 고속버스 스케줄 조회
     date 형식: YYYYMMDD (예: 20250501)
     """
-    dep_code = getattr(TerminalCode, dep_terminal_name, None)
-    arr_code = getattr(TerminalCode, arr_terminal_name, None)
+    dep_id = getattr(TerminalId, dep_terminal_name, None)
+    arr_id = getattr(TerminalId, arr_terminal_name, None)
 
-    if not dep_code or not arr_code:
+    if not dep_id or not arr_id:
         logger.warning(f"알 수 없는 터미널명: {dep_terminal_name} -> {arr_terminal_name}")
         return []
 
-    data = _get(Endpoint.ROUTE_LIST, {
-        "depTerminalId": dep_code,
-        "arrTerminalId": arr_code,
+    data = _get(SCHEDULE_PATH, {
+        "depTerminalId": dep_id,
+        "arrTerminalId": arr_id,
         "depPlandTime":  date,
         "numOfRows":     20,
         "pageNo":        1,
