@@ -1,5 +1,5 @@
 import json 
-from app.external.tour_api.tour_api import get_spots_by_area, search_spots_by_keyword,get_spot_detail,get_spots_by_category
+from app.planner.external.tour_api.tour_api import get_spots_by_area, search_spots_by_keyword,get_spot_detail,get_spots_by_category
 
 def execute_tool(tool_name: str, tool_input: dict):
     try:

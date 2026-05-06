@@ -1,8 +1,8 @@
 import json
 import anthropic
 from app.core.config import ANTHROPIC_API_KEY
-from app.agent.tools import TRAVEL_TOOLS
-from app.agent.tool_executor import execute_tool
+from app.planner.agent.tools import TRAVEL_TOOLS
+from app.planner.agent.tool_executor import execute_tool
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
@@ -15,7 +15,7 @@ DEFAULT_SYSTEM_PROMPT = """
 def plan_travel(user_request: str)-> dict:
     messages = [{"role": "user", "content": user_request}]
 
-    max_iterations = 10
+    max_iterations = 30
     count = 0
 
     while count < max_iterations:
