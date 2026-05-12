@@ -47,79 +47,162 @@ export default function LoginScreen({ navigation }) {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <View style={styles.inner}>
-        <Text style={styles.title}>여행 플래너</Text>
-        <Text style={styles.subtitle}>로그인</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="이메일"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="비밀번호"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        <View style={styles.header}>
+          <Text style={styles.title}>여행 플래너</Text>
+          <Text style={styles.subtitle}>다시 만나서 반가워요</Text>
+        </View>
 
-        <TouchableOpacity style={styles.loginBtn} onPress={handleLogin} disabled={loading}>
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginBtnText}>로그인</Text>}
-        </TouchableOpacity>
+        <View style={styles.form}>
+          <TextInput
+            style={styles.input}
+            placeholder="이메일"
+            placeholderTextColor="#9CA3AF"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="비밀번호"
+            placeholderTextColor="#9CA3AF"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-        <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-          <Text style={styles.signupLink}>계정이 없으신가요? <Text style={styles.signupLinkBold}>회원가입</Text></Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.loginBtn} onPress={handleLogin} disabled={loading}>
+            {loading
+              ? <ActivityIndicator color="#fff" />
+              : <Text style={styles.loginBtnText}>로그인</Text>
+            }
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+            <Text style={styles.signupLink}>
+              계정이 없으신가요? <Text style={styles.signupLinkBold}>회원가입</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.dividerRow}>
           <View style={styles.divider} />
-          <Text style={styles.dividerText}>또는</Text>
+          <Text style={styles.dividerText}>소셜 로그인</Text>
           <View style={styles.divider} />
         </View>
 
-        <TouchableOpacity style={styles.kakaoBtn} onPress={handleKakaoLogin}>
-          <Text style={styles.kakaoBtnText}>카카오로 로그인</Text>
-        </TouchableOpacity>
+        <View style={styles.socialGroup}>
+          <TouchableOpacity style={styles.kakaoBtn} onPress={handleKakaoLogin}>
+            <Text style={styles.kakaoBtnText}>카카오로 계속하기</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.naverBtn} onPress={handleNaverLogin}>
+            <Text style={styles.naverBtnText}>네이버로 계속하기</Text>
+          </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity style={styles.naverBtn} onPress={handleNaverLogin}>
-          <Text style={styles.naverBtnText}>네이버로 로그인</Text>
-        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  inner: { flex: 1, justifyContent: 'center', paddingHorizontal: 28 },
-  title: { fontSize: 32, fontWeight: 'bold', color: '#FF6B6B', textAlign: 'center', marginBottom: 4 },
-  subtitle: { fontSize: 18, color: '#666', textAlign: 'center', marginBottom: 36 },
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  inner: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 28,
+  },
+  header: {
+    marginBottom: 40,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#111827',
+    letterSpacing: -0.5,
+    marginBottom: 6,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#6B7280',
+  },
+  form: {
+    marginBottom: 32,
+  },
   input: {
-    borderWidth: 1, borderColor: '#ddd', borderRadius: 12,
-    paddingHorizontal: 16, paddingVertical: 14, fontSize: 16,
-    marginBottom: 14, backgroundColor: '#fafafa',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+    fontSize: 15,
+    color: '#111827',
+    marginBottom: 12,
   },
   loginBtn: {
-    backgroundColor: '#FF6B6B', borderRadius: 12,
-    paddingVertical: 16, alignItems: 'center', marginTop: 6,
+    backgroundColor: '#111827',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 16,
   },
-  loginBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  signupLink: { textAlign: 'center', marginTop: 16, color: '#888', fontSize: 14 },
-  signupLinkBold: { color: '#FF6B6B', fontWeight: 'bold' },
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 24 },
-  divider: { flex: 1, height: 1, backgroundColor: '#eee' },
-  dividerText: { marginHorizontal: 12, color: '#aaa', fontSize: 13 },
+  loginBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  signupLink: {
+    textAlign: 'center',
+    color: '#9CA3AF',
+    fontSize: 14,
+  },
+  signupLinkBold: {
+    color: '#111827',
+    fontWeight: '600',
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E7EB',
+  },
+  dividerText: {
+    marginHorizontal: 12,
+    color: '#9CA3AF',
+    fontSize: 12,
+    letterSpacing: 0.3,
+  },
+  socialGroup: {
+    gap: 10,
+  },
   kakaoBtn: {
-    backgroundColor: '#FEE500', borderRadius: 12,
-    paddingVertical: 16, alignItems: 'center', marginBottom: 12,
+    backgroundColor: '#FEE500',
+    borderRadius: 12,
+    paddingVertical: 15,
+    alignItems: 'center',
   },
-  kakaoBtnText: { color: '#3C1E1E', fontSize: 16, fontWeight: 'bold' },
+  kakaoBtnText: {
+    color: '#191919',
+    fontSize: 15,
+    fontWeight: '600',
+  },
   naverBtn: {
-    backgroundColor: '#03C75A', borderRadius: 12,
-    paddingVertical: 16, alignItems: 'center',
+    backgroundColor: '#03C75A',
+    borderRadius: 12,
+    paddingVertical: 15,
+    alignItems: 'center',
   },
-  naverBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  naverBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
+  },
 });
