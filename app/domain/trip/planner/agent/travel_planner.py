@@ -1,8 +1,8 @@
 import json
 import anthropic
 from app.core.config import ANTHROPIC_API_KEY
-from app.planner.agent.tools import TRAVEL_TOOLS
-from app.planner.agent.tool_executor import execute_tool
+from app.domain.trip.planner.agent.tools import TRAVEL_TOOLS
+from app.domain.trip.planner.agent.tool_executor import execute_tool
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 

@@ -4,8 +4,8 @@ import re
 # from app.core.config import ANTHROPIC_API_KEY
 from google import genai
 from app.core.config import GEMINI_API_KEY
-from app.planner.pipeline.data_collector import collect_travel_data
-from app.planner.pipeline.prompt_builder import build_prompt
+from app.domain.trip.planner.pipeline.data_collector import collect_travel_data
+from app.domain.trip.planner.pipeline.prompt_builder import build_prompt
 
 # Anthropic 클라이언트 (주석 처리)
 # client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)

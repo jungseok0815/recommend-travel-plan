@@ -17,8 +17,7 @@ export default function App() {
   }, []);
 
   const checkToken = async () => {
-    const token = await getAccessToken();
-    setInitialRoute(token ? 'Main' : 'Login');
+    setInitialRoute('Login');
   };
 
   if (!initialRoute) {

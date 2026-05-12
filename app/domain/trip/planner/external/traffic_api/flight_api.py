@@ -1,7 +1,7 @@
 import logging
 import httpx
 from app.core.config import TOUR_API_KEY
-from app.planner.external.traffic_api.flight_api_constants import BASE_URL, SCHEDULE_ENDPOINT, AirportCode
+from app.domain.trip.planner.external.traffic_api.flight_api_constants import BASE_URL, SCHEDULE_ENDPOINT, AirportCode
 
 logger = logging.getLogger(__name__)
 

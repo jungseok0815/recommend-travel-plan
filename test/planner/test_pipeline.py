@@ -1,5 +1,5 @@
 import json
-from app.planner.pipeline.travel_planner import plan_travel
+from app.domain.trip.planner.pipeline.travel_planner import plan_travel
 
 
 def test_plan_travel():

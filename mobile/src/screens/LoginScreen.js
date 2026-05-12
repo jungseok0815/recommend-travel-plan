@@ -99,7 +99,7 @@ export default function LoginScreen({ navigation }) {
             style={styles.devBtn}
             onPress={async () => {
               await saveTokens('dev_token', 'dev_refresh');
-              navigation.replace('Home');
+              navigation.replace('Main');
             }}
           >
             <Text style={styles.devBtnText}>개발용 — 로그인 없이 시작</Text>

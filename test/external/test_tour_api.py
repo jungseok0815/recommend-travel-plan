@@ -1,4 +1,4 @@
-from app.planner.external.tour_api.tour_api import get_spots_by_category,get_spots_by_area,get_spot_detail,search_spots_by_keyword
+from app.domain.trip.planner.external.tour_api.tour_api import get_spots_by_category,get_spots_by_area,get_spot_detail,search_spots_by_keyword
 ## test 실행방법 
 ## pytest test/external/test_tour_api.py -v -s
 

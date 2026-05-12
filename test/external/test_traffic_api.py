@@ -1,8 +1,8 @@
 import httpx
 from app.core.config import TOUR_API_KEY
-from app.planner.external.traffic_api.flight_api import get_flight_schedules
-from app.planner.external.traffic_api.bus_api import get_bus_routes
-from app.planner.external.traffic_api.bus_api_constants import BASE_URL, SCHEDULE_PATH
+from app.domain.trip.planner.external.traffic_api.flight_api import get_flight_schedules
+from app.domain.trip.planner.external.traffic_api.bus_api import get_bus_routes
+from app.domain.trip.planner.external.traffic_api.bus_api_constants import BASE_URL, SCHEDULE_PATH
 
 ## test 실행방법
 ## venv\Scripts\pytest test/external/test_traffic_api.py -v -s

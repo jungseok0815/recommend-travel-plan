@@ -1,4 +1,4 @@
-from app.planner.external.tour_api.tour_api import get_spots_by_area
+from app.domain.trip.planner.external.tour_api.tour_api import get_spots_by_area
 
 
 def collect_travel_data(area_name: str) -> dict:
