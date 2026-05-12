@@ -1,6 +1,62 @@
 import * as WebBrowser from 'expo-web-browser';
+import { getAccessToken, saveTokens, clearTokens } from '../utils/tokenStorage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BASE_URL = 'http://localhost:8000';
+
+const request = async (url, options = {}) => {
+  const token = await getAccessToken();
+  const res = await fetch(`${BASE_URL}${url}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
+  });
+
+  // access_token 만료 시 refresh_token으로 자동 갱신
+  if (res.status === 401) {
+    const refreshed = await tryRefreshToken();
+    if (!refreshed) throw new Error('SESSION_EXPIRED');
+
+    const newToken = await getAccessToken();
+    const retryRes = await fetch(`${BASE_URL}${url}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${newToken}`,
+        ...options.headers,
+      },
+    });
+    return retryRes;
+  }
+
+  return res;
+};
+
+const tryRefreshToken = async () => {
+  try {
+    const refreshToken = await AsyncStorage.getItem('refresh_token');
+    if (!refreshToken) return false;
+
+    const res = await fetch(`${BASE_URL}/user/token/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+    if (!res.ok) {
+      await clearTokens();
+      return false;
+    }
+    const { access_token, refresh_token } = await res.json();
+    await saveTokens(access_token, refresh_token);
+    return true;
+  } catch {
+    await clearTokens();
+    return false;
+  }
+};
 
 export const signup = async (email, password, address) => {
   const res = await fetch(`${BASE_URL}/user/signup`, {
@@ -31,9 +87,10 @@ export const openNaverLogin = async () => {
 };
 
 export const openKakaoLogin = async () => {
-  // 백엔드 카카오 OAuth 엔드포인트 구현 후 연동 필요
   const KAKAO_REST_API_KEY = 'YOUR_KAKAO_REST_API_KEY';
   const REDIRECT_URI = `${BASE_URL}/user/auth/kakao/callback`;
   const url = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code`;
   await WebBrowser.openBrowserAsync(url);
 };
+
+export { request };

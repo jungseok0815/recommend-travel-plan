@@ -6,6 +6,8 @@ import {
 import { login, openNaverLogin, openKakaoLogin } from '../services/authService';
 import { saveTokens } from '../utils/tokenStorage';
 
+const DEV_MODE = true; // DB 연결 후 false로 변경
+
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -91,6 +93,18 @@ export default function LoginScreen({ navigation }) {
           <Text style={styles.dividerText}>소셜 로그인</Text>
           <View style={styles.divider} />
         </View>
+
+        {DEV_MODE && (
+          <TouchableOpacity
+            style={styles.devBtn}
+            onPress={async () => {
+              await saveTokens('dev_token', 'dev_refresh');
+              navigation.replace('Home');
+            }}
+          >
+            <Text style={styles.devBtnText}>개발용 — 로그인 없이 시작</Text>
+          </TouchableOpacity>
+        )}
 
         <View style={styles.socialGroup}>
           <TouchableOpacity style={styles.kakaoBtn} onPress={handleKakaoLogin}>
@@ -204,5 +218,18 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
+  },
+  devBtn: {
+    marginTop: 24,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    borderStyle: 'dashed',
+  },
+  devBtnText: {
+    color: '#9CA3AF',
+    fontSize: 13,
   },
 });
