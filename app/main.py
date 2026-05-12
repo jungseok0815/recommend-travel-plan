@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from app.core.security import decode_token, create_access_token, create_refresh_token
@@ -7,8 +8,18 @@ from app.domain.trip.routers.tripRouter import router as trip_router
 from app.domain.preference.routers.preferenceRouter import router as preference_router
 from app.dependencies.auth import verify_refresh_token
 from app.db.redis import set_refresh_token
+from app.db.database import Base, engine
+from app.domain.user.models.userModel import User
+from app.domain.user.models.socialAccountModel import SocialAccount
+from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule
+from app.domain.preference.models.preferenceModel import Preference
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+app = FastAPI(lifespan=lifespan)
 app.include_router(user_router)
 app.include_router(trip_router)
 app.include_router(preference_router)
