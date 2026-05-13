@@ -1,8 +1,8 @@
 import logging
 from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException
-from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule
-from app.domain.trip.schema.tripSchema import TripCreate, TripResponse
+from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule, TripReview
+from app.domain.trip.schema.tripSchema import TripCreate, TripResponse, TripReviewCreate
 from app.domain.user.models.userModel import User
 
 logger = logging.getLogger(__name__)
@@ -91,7 +91,44 @@ def get_community_trips(db: Session, user_id: int) -> list[dict]:
             "group_size": trip.group_size,
             "budget": trip.budget,
             "total_cost": trip.total_cost,
+            "status": trip.status,
             "user_email": email,
             "days": days_data,
         })
     return result
+
+
+def create_or_update_review(db: Session, user_id: int, trip_id: int, review_data: TripReviewCreate) -> TripReview:
+    logger.info(f"리뷰 작성/수정 - user_id: {user_id}, trip_id: {trip_id}")
+    trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == user_id).first()
+    if trip is None:
+        raise HTTPException(status_code=404, detail="여행 일정을 찾을 수 없습니다")
+    if trip.status != '완료':
+        raise HTTPException(status_code=400, detail="완료된 여행만 리뷰를 작성할 수 있습니다")
+
+    review = db.query(TripReview).filter(TripReview.trip_id == trip_id).first()
+    if review:
+        review.rating  = review_data.rating
+        review.content = review_data.content
+    else:
+        review = TripReview(
+            trip_id = trip_id,
+            user_id = user_id,
+            rating  = review_data.rating,
+            content = review_data.content,
+        )
+        db.add(review)
+    db.commit()
+    db.refresh(review)
+    return review
+
+
+def get_review(db: Session, user_id: int, trip_id: int) -> TripReview:
+    logger.info(f"리뷰 조회 - user_id: {user_id}, trip_id: {trip_id}")
+    trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == user_id).first()
+    if trip is None:
+        raise HTTPException(status_code=404, detail="여행 일정을 찾을 수 없습니다")
+    review = db.query(TripReview).filter(TripReview.trip_id == trip_id).first()
+    if review is None:
+        raise HTTPException(status_code=404, detail="리뷰가 없습니다")
+    return review

@@ -12,7 +12,7 @@ from app.db.redis import set_refresh_token
 from app.db.database import Base, engine
 from app.domain.user.models.userModel import User
 from app.domain.user.models.socialAccountModel import SocialAccount
-from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule
+from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule, TripReview
 from app.domain.preference.models.preferenceModel import Preference
 
 @asynccontextmanager

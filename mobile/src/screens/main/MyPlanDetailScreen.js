@@ -4,6 +4,89 @@ import {
   SafeAreaView, Alert, Modal, TextInput, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { saveReview } from '../../services/authService';
+
+const USE_DUMMY = true;
+
+function StarRating({ rating, onSelect, readonly = false }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 6 }}>
+      {[1, 2, 3, 4, 5].map((star) => (
+        <TouchableOpacity
+          key={star}
+          onPress={() => !readonly && onSelect && onSelect(star)}
+          disabled={readonly}
+          activeOpacity={readonly ? 1 : 0.7}
+        >
+          <Ionicons
+            name={star <= rating ? 'star' : 'star-outline'}
+            size={28}
+            color={star <= rating ? '#F59E0B' : '#D1D5DB'}
+          />
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+}
+
+function ReviewModal({ visible, existing, onSave, onClose }) {
+  const [rating, setRating]   = useState(existing?.rating ?? 0);
+  const [content, setContent] = useState(existing?.content ?? '');
+
+  React.useEffect(() => {
+    if (visible) {
+      setRating(existing?.rating ?? 0);
+      setContent(existing?.content ?? '');
+    }
+  }, [visible]);
+
+  const handleSave = () => {
+    if (rating === 0) { Alert.alert('알림', '별점을 선택해주세요'); return; }
+    if (!content.trim()) { Alert.alert('알림', '리뷰 내용을 입력해주세요'); return; }
+    onSave({ rating, content });
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.modalOverlay}
+      >
+        <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
+        <View style={styles.modalSheet}>
+          <View style={styles.modalHandle} />
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{existing ? '리뷰 수정' : '리뷰 작성'}</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={22} color="#111827" />
+            </TouchableOpacity>
+          </View>
+          <ScrollView contentContainerStyle={styles.modalBody}>
+            <Text style={styles.fieldLabel}>별점</Text>
+            <StarRating rating={rating} onSelect={setRating} />
+            <Text style={[styles.fieldLabel, { marginTop: 16 }]}>리뷰</Text>
+            <TextInput
+              style={[styles.fieldInput, { height: 120, textAlignVertical: 'top' }]}
+              value={content}
+              onChangeText={setContent}
+              placeholder="여행 후기를 남겨주세요"
+              placeholderTextColor="#9CA3AF"
+              multiline
+            />
+          </ScrollView>
+          <View style={styles.modalFooter}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+              <Text style={styles.cancelBtnText}>취소</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+              <Text style={styles.saveBtnText}>저장</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
 
 function EditModal({ visible, schedule, onSave, onClose }) {
   const [time, setTime] = useState(schedule?.time ?? '');
@@ -100,8 +183,10 @@ function EditModal({ visible, schedule, onSave, onClose }) {
 export default function MyPlanDetailScreen({ navigation, route }) {
   const { trip } = route.params;
   const [days, setDays] = useState(trip.days ?? []);
-  const [editTarget, setEditTarget] = useState(null); // { dayIndex, scheduleIndex }
+  const [editTarget, setEditTarget] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [review, setReview] = useState(trip.review ?? null);
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
 
   const currentSchedule =
     editTarget != null
@@ -111,6 +196,21 @@ export default function MyPlanDetailScreen({ navigation, route }) {
   const handleEdit = (dayIndex, scheduleIndex) => {
     setEditTarget({ dayIndex, scheduleIndex });
     setModalVisible(true);
+  };
+
+  const handleReviewSave = async (data) => {
+    if (!USE_DUMMY) {
+      try {
+        const saved = await saveReview(trip.id, data.rating, data.content);
+        setReview(saved);
+      } catch (e) {
+        Alert.alert('오류', e.message);
+        return;
+      }
+    } else {
+      setReview(data);
+    }
+    setReviewModalVisible(false);
   };
 
   const handleSave = (updated) => {
@@ -221,6 +321,32 @@ export default function MyPlanDetailScreen({ navigation, route }) {
         </View>
 
         {/* 일정 */}
+        {trip.status === '완료' && (
+          <View style={styles.section}>
+            <View style={styles.reviewSectionHeader}>
+              <Text style={styles.sectionTitle}>리뷰</Text>
+              <TouchableOpacity
+                style={styles.reviewEditBtn}
+                onPress={() => setReviewModalVisible(true)}
+              >
+                <Ionicons name={review ? 'pencil-outline' : 'add'} size={16} color="#6B7280" />
+                <Text style={styles.reviewEditBtnText}>{review ? '수정' : '작성'}</Text>
+              </TouchableOpacity>
+            </View>
+            {review ? (
+              <View style={styles.reviewCard}>
+                <StarRating rating={review.rating} readonly />
+                <Text style={styles.reviewContent}>{review.content}</Text>
+              </View>
+            ) : (
+              <View style={styles.reviewEmpty}>
+                <Ionicons name="chatbubble-outline" size={32} color="#D1D5DB" />
+                <Text style={styles.reviewEmptyText}>아직 리뷰가 없어요{'\n'}여행 후기를 남겨보세요</Text>
+              </View>
+            )}
+          </View>
+        )}
+
         {days.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>일정</Text>
@@ -277,6 +403,12 @@ export default function MyPlanDetailScreen({ navigation, route }) {
         schedule={currentSchedule}
         onSave={handleSave}
         onClose={() => { setModalVisible(false); setEditTarget(null); }}
+      />
+      <ReviewModal
+        visible={reviewModalVisible}
+        existing={review}
+        onSave={handleReviewSave}
+        onClose={() => setReviewModalVisible(false)}
       />
     </SafeAreaView>
   );
@@ -359,6 +491,23 @@ const styles = StyleSheet.create({
 
   scheduleActions: { flexDirection: 'row', gap: 4, alignItems: 'flex-start', paddingTop: 2 },
   actionBtn: { padding: 6 },
+
+  reviewSectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  reviewEditBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 4 },
+  reviewEditBtnText: { fontSize: 13, color: '#6B7280' },
+  reviewCard: {
+    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, gap: 10,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
+  },
+  reviewContent: { fontSize: 14, color: '#374151', lineHeight: 22 },
+  reviewEmpty: {
+    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 28,
+    alignItems: 'center', gap: 10,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
+  },
+  reviewEmptyText: { fontSize: 13, color: '#9CA3AF', textAlign: 'center', lineHeight: 20 },
 
   // 모달
   modalOverlay: { flex: 1, justifyContent: 'flex-end' },

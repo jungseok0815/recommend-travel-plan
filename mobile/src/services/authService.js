@@ -147,4 +147,22 @@ export const getCommunityTrips = async () => {
   return data;
 };
 
+export const saveReview = async (tripId, rating, content) => {
+  const res = await request(`/trip/${tripId}/review`, {
+    method: 'POST',
+    body: JSON.stringify({ rating, content }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '리뷰 저장에 실패했습니다');
+  return data;
+};
+
+export const fetchReview = async (tripId) => {
+  const res = await request(`/trip/${tripId}/review`);
+  if (res.status === 404) return null;
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '리뷰를 불러올 수 없습니다');
+  return data;
+};
+
 export { request };

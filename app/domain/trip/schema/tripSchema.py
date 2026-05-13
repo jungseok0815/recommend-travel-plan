@@ -25,7 +25,7 @@ class TripScheduleResponse(BaseModel):
     transport        : str | None = None
     duration         : str | None = None
     cost             : int
-    remaining_budget : int
+    remaining_budget : int | None = None
     note             : str | None = None
 
     model_config = {"from_attributes": True}
@@ -42,17 +42,18 @@ class TripDayResponse(BaseModel):
 
 
 class TripResponse(BaseModel):
-    id             : int
-    user_id        : int
-    destination    : str
-    transport      : str
-    start_datetime : str
-    end_datetime   : str
-    group_size     : int
-    budget         : int
-    total_cost     : int | None = None
-    remaining_budget: int | None = None
-    days           : list[TripDayResponse] = []
+    id               : int
+    user_id          : int
+    destination      : str
+    transport        : str
+    start_datetime   : str
+    end_datetime     : str
+    group_size       : int
+    budget           : int
+    total_cost       : int | None = None
+    remaining_budget : int | None = None
+    status           : str = '계획 중'
+    days             : list[TripDayResponse] = []
 
     model_config = {"from_attributes": True}
 
@@ -66,5 +67,23 @@ class CommunityTripResponse(BaseModel):
     group_size     : int
     budget         : int
     total_cost     : int | None = None
+    status         : str = '계획 중'
     user_email     : str
     days           : list[TripDayResponse] = []
+
+
+class TripReviewCreate(BaseModel):
+    rating  : int
+    content : str
+
+
+class TripReviewResponse(BaseModel):
+    id         : int
+    trip_id    : int
+    user_id    : int
+    rating     : int
+    content    : str
+    created_at : str
+    updated_at : str
+
+    model_config = {"from_attributes": True}
