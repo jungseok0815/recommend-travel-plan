@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.domain.user.models.userModel import User
 from app.domain.user.models.socialAccountModel import SocialAccount
-from app.domain.user.schema.userSchema import UserCreate, UserLogin, UserResponse, TokenResponse
+from app.domain.user.schema.userSchema import UserCreate, UserLogin, UserResponse, TokenResponse, UserUpdate
 from app.utils.hash import hash_password, verify_password
 from app.core.security import create_access_token, create_refresh_token
 from app.db.redis import set_refresh_token, delete_refresh_token
@@ -58,6 +58,17 @@ def select_user(db: Session, user_id: int) -> UserResponse:
         raise HTTPException(status_code=404, detail="유저를 찾을 수 없습니다")
 
     return user
+
+def update_user(db: Session, user_id: int, user_data: UserUpdate) -> UserResponse:
+    logger.info(f"유저 수정 - user_id: {user_id}")
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="유저를 찾을 수 없습니다")
+    user.address = user_data.address
+    db.commit()
+    db.refresh(user)
+    return user
+
 
 def get_or_create_social_user(db: Session, email: str, provider: str, provider_id: str) -> User:
     social = db.query(SocialAccount).filter(

@@ -15,6 +15,9 @@ class UserResponse(BaseModel):
     address: str
     model_config = {"from_attributes": True}
 
+class UserUpdate(BaseModel):
+    address: str
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str

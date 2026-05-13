@@ -62,9 +62,9 @@ export default function ProfileScreen({ navigation }) {
       <View style={styles.menuGroup}>
         <Text style={styles.menuGroupTitle}>계정</Text>
         <View style={styles.menuCard}>
-          <MenuItem icon="person-outline" label="내 정보 수정" onPress={() => {}} />
+          <MenuItem icon="person-outline" label="내 정보 수정" onPress={() => navigation.navigate('EditProfile')} />
           <View style={styles.menuDivider} />
-          <MenuItem icon="notifications-outline" label="알림 설정" onPress={() => {}} />
+          <MenuItem icon="notifications-outline" label="알림 설정" onPress={() => navigation.navigate('NotificationSettings')} />
         </View>
       </View>
 

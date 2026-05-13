@@ -94,6 +94,16 @@ export const getMe = async () => {
   return data; // { id, email, address }
 };
 
+export const updateMe = async (body) => {
+  const res = await request('/user/me', {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '정보 수정에 실패했습니다');
+  return data;
+};
+
 export const openNaverLogin = async () => {
   const res = await fetch(`${BASE_URL}/user/auth/naver`);
   const data = await res.json();

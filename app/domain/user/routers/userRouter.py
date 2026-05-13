@@ -4,7 +4,8 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.domain.user.schema.userSchema import UserCreate, UserLogin, TokenResponse
-from app.domain.user.services.userService import create_user, login_user, select_user, logout_user, is_email_taken
+from app.domain.user.schema.userSchema import UserCreate, UserLogin, TokenResponse, UserUpdate
+from app.domain.user.services.userService import create_user, login_user, select_user, logout_user, is_email_taken, update_user
 from app.domain.user.services.oauthService import get_naver_login_url, auth_naver_login, get_kakao_login_url, auth_kakao_login
 
 logger = logging.getLogger(__name__)
@@ -57,6 +58,12 @@ def select(request: Request, db: Session = Depends(get_db)):
     user_id = request.state.user_id
     logger.info(f"유저 조회 요청 - user_id: {user_id}")
     return select_user(db, int(user_id))
+
+@router.patch("/me")
+def update(request: Request, user_data: UserUpdate, db: Session = Depends(get_db)):
+    user_id = request.state.user_id
+    logger.info(f"유저 수정 요청 - user_id: {user_id}")
+    return update_user(db, int(user_id), user_data)
 
 @router.post("/logout")
 def logout(request: Request):
