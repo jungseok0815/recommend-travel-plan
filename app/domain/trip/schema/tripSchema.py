@@ -28,3 +28,15 @@ class TripResponse(BaseModel):
     itinerary      : str
 
     model_config = {"from_attributes": True}
+
+
+class CommunityTripResponse(BaseModel):
+    id             : int
+    destination    : str
+    transport      : str
+    start_datetime : str
+    end_datetime   : str
+    group_size     : int
+    budget         : int
+    total_cost     : int | None
+    user_email     : str

@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/main/HomeScreen';
 import MyPlansScreen from '../screens/main/MyPlansScreen';
+import ExploreScreen from '../screens/main/ExploreScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
@@ -27,10 +28,11 @@ export default function TabNavigator({ navigation }) {
           fontWeight: '500',
           marginTop: 2,
         },
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ focused, color }) => {
           const icons = {
             Home: focused ? 'home' : 'home-outline',
             MyPlans: focused ? 'map' : 'map-outline',
+            Explore: focused ? 'compass' : 'compass-outline',
             Profile: focused ? 'person' : 'person-outline',
           };
           return <Ionicons name={icons[route.name]} size={22} color={color} />;
@@ -39,6 +41,7 @@ export default function TabNavigator({ navigation }) {
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: '홈' }} />
       <Tab.Screen name="MyPlans" component={MyPlansScreen} options={{ tabBarLabel: '내 계획' }} />
+      <Tab.Screen name="Explore" component={ExploreScreen} options={{ tabBarLabel: '탐색' }} />
       <Tab.Screen
         name="Profile"
         options={{ tabBarLabel: '프로필' }}

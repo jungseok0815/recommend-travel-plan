@@ -140,4 +140,11 @@ export const openKakaoLogin = async () => {
   return { access_token: params.access_token, refresh_token: params.refresh_token };
 };
 
+export const getCommunityTrips = async () => {
+  const res = await request('/trip/community');
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '커뮤니티 여행 목록을 불러올 수 없습니다');
+  return data;
+};
+
 export { request };

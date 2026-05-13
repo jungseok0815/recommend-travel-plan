@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.domain.trip.models.tripModel import Trip
 from app.domain.trip.schema.tripSchema import TripCreate, TripResponse
+from app.domain.user.models.userModel import User
 
 logger = logging.getLogger(__name__)
 
@@ -36,3 +37,28 @@ def get_trip(db: Session, user_id: int, trip_id: int) -> TripResponse:
     if trip is None:
         raise HTTPException(status_code=404, detail="여행 일정을 찾을 수 없습니다")
     return trip
+
+
+def get_community_trips(db: Session, user_id: int) -> list[dict]:
+    logger.info(f"커뮤니티 여행 목록 조회 - user_id: {user_id}")
+    rows = (
+        db.query(Trip, User.email)
+        .join(User, Trip.user_id == User.id)
+        .filter(Trip.user_id != user_id)
+        .order_by(Trip.id.desc())
+        .all()
+    )
+    return [
+        {
+            "id": trip.id,
+            "destination": trip.destination,
+            "transport": trip.transport,
+            "start_datetime": trip.start_datetime,
+            "end_datetime": trip.end_datetime,
+            "group_size": trip.group_size,
+            "budget": trip.budget,
+            "total_cost": trip.total_cost,
+            "user_email": email,
+        }
+        for trip, email in rows
+    ]
