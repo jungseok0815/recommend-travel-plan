@@ -31,7 +31,7 @@ export default function LoginScreen({ navigation, route }) {
     try {
       const { access_token, refresh_token } = await login(email, password);
       await saveTokens(access_token, refresh_token);
-      navigation.replace('Home');
+      navigation.replace('Main');
     } catch (e) {
       Alert.alert('로그인 실패', e.message);
     } finally {
