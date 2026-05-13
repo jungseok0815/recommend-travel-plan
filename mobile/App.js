@@ -8,6 +8,7 @@ import TabNavigator from './src/navigation/TabNavigator';
 import EditProfileScreen from './src/screens/main/EditProfileScreen';
 import NotificationSettingsScreen from './src/screens/main/NotificationSettingsScreen';
 import TripDetailScreen from './src/screens/main/TripDetailScreen';
+import MyPlanDetailScreen from './src/screens/main/MyPlanDetailScreen';
 import { getAccessToken } from './src/utils/tokenStorage';
 
 const Stack = createNativeStackNavigator();
@@ -41,6 +42,7 @@ export default function App() {
         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
         <Stack.Screen name="TripDetail" component={TripDetailScreen} />
+        <Stack.Screen name="MyPlanDetail" component={MyPlanDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

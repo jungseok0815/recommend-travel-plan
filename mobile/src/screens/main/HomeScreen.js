@@ -11,6 +11,7 @@ export default function HomeScreen() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [people, setPeople] = useState(2);
+  const [budget, setBudget] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleGenerate = async () => {
@@ -54,14 +55,14 @@ export default function HomeScreen() {
 
         <View style={styles.rowDivider} />
 
-        {/* 목적지 */}
+        {/* 여행지 */}
         <View style={styles.inputRow}>
           <View style={styles.iconWrap}>
             <Ionicons name="location-outline" size={18} color="#111827" />
           </View>
           <TextInput
             style={styles.input}
-            placeholder="목적지"
+            placeholder="여행지"
             placeholderTextColor="#9CA3AF"
             value={destination}
             onChangeText={setDestination}
@@ -77,7 +78,7 @@ export default function HomeScreen() {
           </View>
           <TextInput
             style={[styles.input, styles.dateInput]}
-            placeholder="출발일 (예: 2025-06-01)"
+            placeholder="2025-06-01"
             placeholderTextColor="#9CA3AF"
             value={startDate}
             onChangeText={setStartDate}
@@ -85,11 +86,33 @@ export default function HomeScreen() {
           <Text style={styles.dateSep}>~</Text>
           <TextInput
             style={[styles.input, styles.dateInput]}
-            placeholder="도착일 (예: 2025-06-03)"
+            placeholder="2025-06-03"
             placeholderTextColor="#9CA3AF"
             value={endDate}
             onChangeText={setEndDate}
           />
+        </View>
+
+        <View style={styles.rowDivider} />
+
+        {/* 여행 경비 */}
+        <View style={styles.inputRow}>
+          <View style={styles.iconWrap}>
+            <Ionicons name="wallet-outline" size={18} color="#9CA3AF" />
+          </View>
+          <TextInput
+            style={styles.input}
+            placeholder="여행 경비 (원)"
+            placeholderTextColor="#9CA3AF"
+            value={budget}
+            onChangeText={(v) => setBudget(v.replace(/[^0-9]/g, ''))}
+            keyboardType="numeric"
+          />
+          {budget.length > 0 && (
+            <Text style={styles.budgetUnit}>
+              {Number(budget).toLocaleString()}원
+            </Text>
+          )}
         </View>
 
         <View style={styles.rowDivider} />
@@ -172,9 +195,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   iconWrap: { width: 28, alignItems: 'center' },
-  input: { flex: 1, fontSize: 15, color: '#111827' },
-  dateInput: { flex: 1 },
+  input: { flex: 1, minWidth: 0, fontSize: 15, color: '#111827', padding: 0, marginLeft: 8 },
+  dateInput: { flex: 1, minWidth: 0 },
   dateSep: { marginHorizontal: 8, color: '#9CA3AF', fontSize: 14 },
+  budgetUnit: { fontSize: 13, color: '#6B7280', fontWeight: '500' },
   rowDivider: { height: 1, backgroundColor: '#F3F4F6', marginLeft: 28 },
 
   peopleLabel: { flex: 1, fontSize: 15, color: '#111827' },
@@ -188,7 +212,7 @@ const styles = StyleSheet.create({
   generateBtn: {
     backgroundColor: '#111827',
     borderRadius: 16,
-    paddingVertical: 17,
+    paddingVertical: 10,
     alignItems: 'center',
     marginBottom: 36,
   },
