@@ -1,25 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getMe, updateMe } from '../../services/authService';
+import { updateMe } from '../../services/authService';
 
-export default function EditProfileScreen({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
-  const [loading, setLoading] = useState(true);
+export default function EditProfileScreen({ navigation, route }) {
+  const { user } = route.params ?? {};
+  const [email] = useState(user?.email ?? '');
+  const [address, setAddress] = useState(user?.address ?? '');
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    getMe()
-      .then(user => {
-        setEmail(user.email ?? '');
-        setAddress(user.address ?? '');
-      })
-      .finally(() => setLoading(false));
-  }, []);
 
   const handleSave = async () => {
     if (!address) {
@@ -49,35 +40,29 @@ export default function EditProfileScreen({ navigation }) {
         <View style={{ width: 24 }} />
       </View>
 
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator color="#111827" />
+      <View style={styles.form}>
+        <Text style={styles.label}>이메일</Text>
+        <View style={styles.readonlyInput}>
+          <Text style={styles.readonlyText}>{email}</Text>
         </View>
-      ) : (
-        <View style={styles.form}>
-          <Text style={styles.label}>이메일</Text>
-          <View style={styles.readonlyInput}>
-            <Text style={styles.readonlyText}>{email}</Text>
-          </View>
-          <Text style={styles.labelHint}>이메일은 변경할 수 없습니다</Text>
+        <Text style={styles.labelHint}>이메일은 변경할 수 없습니다</Text>
 
-          <Text style={[styles.label, { marginTop: 20 }]}>거주지</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="예: 서울시 강남구"
-            placeholderTextColor="#9CA3AF"
-            value={address}
-            onChangeText={setAddress}
-          />
+        <Text style={[styles.label, { marginTop: 20 }]}>거주지</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="예: 서울시 강남구"
+          placeholderTextColor="#9CA3AF"
+          value={address}
+          onChangeText={setAddress}
+        />
 
-          <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving}>
-            {saving
-              ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.saveBtnText}>저장</Text>
-            }
-          </TouchableOpacity>
-        </View>
-      )}
+        <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving}>
+          {saving
+            ? <ActivityIndicator color="#fff" />
+            : <Text style={styles.saveBtnText}>저장</Text>
+          }
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -91,7 +76,6 @@ const styles = StyleSheet.create({
   },
   backBtn: { padding: 4 },
   title: { fontSize: 17, fontWeight: '600', color: '#111827' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   form: { padding: 24 },
   label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 8 },
   labelHint: { fontSize: 12, color: '#9CA3AF', marginTop: 4 },
