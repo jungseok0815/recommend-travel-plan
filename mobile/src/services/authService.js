@@ -97,7 +97,19 @@ export const getMe = async () => {
 export const openNaverLogin = async () => {
   const res = await fetch(`${BASE_URL}/user/auth/naver`);
   const data = await res.json();
-  await WebBrowser.openBrowserAsync(data.url);
+
+  const result = await WebBrowser.openAuthSessionAsync(
+    data.url,
+    'travelplanner://auth/callback'
+  );
+
+  if (result.type !== 'success') return null;
+
+  const query = result.url.split('?')[1] ?? '';
+  const params = Object.fromEntries(query.split('&').map(p => p.split('=').map(decodeURIComponent)));
+  if (!params.access_token) return null;
+
+  return { access_token: params.access_token, refresh_token: params.refresh_token };
 };
 
 export const openKakaoLogin = async () => {

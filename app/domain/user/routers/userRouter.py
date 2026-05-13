@@ -1,5 +1,6 @@
 import logging
 from fastapi import APIRouter, Depends, Request
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.domain.user.schema.userSchema import UserCreate, UserLogin, TokenResponse
@@ -33,7 +34,10 @@ def naver_login():
 @router.get("/auth/naver/callback")
 def naver_callback(code: str, state: str, db: Session = Depends(get_db)):
     logger.info(f"네이버 콜백 - code: {code}, state: {state}")
-    return auth_naver_login(db, code)
+    result = auth_naver_login(db, code)
+    return RedirectResponse(
+        url=f"travelplanner://auth/callback?access_token={result.access_token}&refresh_token={result.refresh_token}"
+    )
 
 @router.get("/me")
 def select(request: Request, db: Session = Depends(get_db)):

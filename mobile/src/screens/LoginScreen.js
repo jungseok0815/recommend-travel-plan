@@ -41,7 +41,11 @@ export default function LoginScreen({ navigation, route }) {
 
   const handleNaverLogin = async () => {
     try {
-      await openNaverLogin();
+      const result = await openNaverLogin();
+      if (result?.access_token) {
+        await saveTokens(result.access_token, result.refresh_token);
+        navigation.replace('Main');
+      }
     } catch (e) {
       Alert.alert('오류', '네이버 로그인을 열 수 없습니다');
     }
