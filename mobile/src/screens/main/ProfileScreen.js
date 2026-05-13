@@ -64,8 +64,6 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.menuCard}>
           <MenuItem icon="person-outline" label="내 정보 수정" onPress={() => {}} />
           <View style={styles.menuDivider} />
-          <MenuItem icon="lock-closed-outline" label="비밀번호 변경" onPress={() => {}} />
-          <View style={styles.menuDivider} />
           <MenuItem icon="notifications-outline" label="알림 설정" onPress={() => {}} />
         </View>
       </View>

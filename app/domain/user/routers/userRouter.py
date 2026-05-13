@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.domain.user.schema.userSchema import UserCreate, UserLogin, TokenResponse
 from app.domain.user.services.userService import create_user, login_user, select_user, logout_user, is_email_taken
-from app.domain.user.services.oauthService import get_naver_login_url, auth_naver_login
+from app.domain.user.services.oauthService import get_naver_login_url, auth_naver_login, get_kakao_login_url, auth_kakao_login
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,19 @@ def naver_login():
 def naver_callback(code: str, state: str, db: Session = Depends(get_db)):
     logger.info(f"네이버 콜백 - code: {code}, state: {state}")
     result = auth_naver_login(db, code)
+    return RedirectResponse(
+        url=f"travelplanner://auth/callback?access_token={result.access_token}&refresh_token={result.refresh_token}"
+    )
+
+@router.get("/auth/kakao")
+def kakao_login():
+    logger.info("카카오 로그인 요청")
+    return {"url": get_kakao_login_url()}
+
+@router.get("/auth/kakao/callback")
+def kakao_callback(code: str, db: Session = Depends(get_db)):
+    logger.info(f"카카오 콜백 - code: {code}")
+    result = auth_kakao_login(db, code)
     return RedirectResponse(
         url=f"travelplanner://auth/callback?access_token={result.access_token}&refresh_token={result.refresh_token}"
     )

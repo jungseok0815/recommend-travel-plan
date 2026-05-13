@@ -49,12 +49,13 @@ def root():
 PUBLIC_PATHS = [
       "/",
       "/user/login",
-      "/user/me",
       "/user/signup",
       "/user/check-email",
       "/user/token/refresh",
       "/user/auth/naver",
       "/user/auth/naver/callback",
+      "/user/auth/kakao",
+      "/user/auth/kakao/callback",
       "/docs",
       "/redoc",
       "/openapi.json"
@@ -62,7 +63,7 @@ PUBLIC_PATHS = [
 
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    if request.url.path in PUBLIC_PATHS:
+    if request.method == "OPTIONS" or request.url.path in PUBLIC_PATHS:
         return await call_next(request)
 
     authorization = request.headers.get("Authorization")

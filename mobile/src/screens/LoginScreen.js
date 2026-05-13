@@ -53,7 +53,11 @@ export default function LoginScreen({ navigation, route }) {
 
   const handleKakaoLogin = async () => {
     try {
-      await openKakaoLogin();
+      const result = await openKakaoLogin();
+      if (result?.access_token) {
+        await saveTokens(result.access_token, result.refresh_token);
+        navigation.replace('Main');
+      }
     } catch (e) {
       Alert.alert('오류', '카카오 로그인을 열 수 없습니다');
     }

@@ -113,10 +113,21 @@ export const openNaverLogin = async () => {
 };
 
 export const openKakaoLogin = async () => {
-  const KAKAO_REST_API_KEY = 'YOUR_KAKAO_REST_API_KEY';
-  const REDIRECT_URI = `${BASE_URL}/user/auth/kakao/callback`;
-  const url = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code`;
-  await WebBrowser.openBrowserAsync(url);
+  const res = await fetch(`${BASE_URL}/user/auth/kakao`);
+  const data = await res.json();
+
+  const result = await WebBrowser.openAuthSessionAsync(
+    data.url,
+    'travelplanner://auth/callback'
+  );
+
+  if (result.type !== 'success') return null;
+
+  const query = result.url.split('?')[1] ?? '';
+  const params = Object.fromEntries(query.split('&').map(p => p.split('=').map(decodeURIComponent)));
+  if (!params.access_token) return null;
+
+  return { access_token: params.access_token, refresh_token: params.refresh_token };
 };
 
 export { request };
