@@ -58,6 +58,13 @@ const tryRefreshToken = async () => {
   }
 };
 
+export const checkEmailDuplicate = async (email) => {
+  const res = await fetch(`${BASE_URL}/user/check-email?email=${encodeURIComponent(email)}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '이메일 확인 중 오류가 발생했습니다');
+  return data.available; // true: 사용 가능, false: 중복
+};
+
 export const signup = async (email, password, address) => {
   const res = await fetch(`${BASE_URL}/user/signup`, {
     method: 'POST',

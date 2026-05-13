@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from app.core.security import decode_token, create_access_token, create_refresh_token
 from app.domain.user.routers.userRouter import router as user_router
 from app.domain.trip.routers.tripRouter import router as trip_router
@@ -20,6 +21,15 @@ async def lifespan(_: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8081"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(user_router)
 app.include_router(trip_router)
 app.include_router(preference_router)
@@ -40,6 +50,7 @@ PUBLIC_PATHS = [
       "/",
       "/user/login",
       "/user/signup",
+      "/user/check-email",
       "/user/token/refresh",
       "/user/auth/naver",
       "/user/auth/naver/callback",

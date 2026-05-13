@@ -3,12 +3,17 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.domain.user.schema.userSchema import UserCreate, UserLogin, TokenResponse
-from app.domain.user.services.userService import create_user, login_user, select_user, logout_user
+from app.domain.user.services.userService import create_user, login_user, select_user, logout_user, is_email_taken
 from app.domain.user.services.oauthService import get_naver_login_url, auth_naver_login
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/user")
+
+@router.get("/check-email")
+def check_email(email: str, db: Session = Depends(get_db)):
+    logger.info(f"이메일 중복 확인 - email: {email}")
+    return {"available": not is_email_taken(db, email)}
 
 @router.post("/signup")
 def signup(user_data: UserCreate, db: Session = Depends(get_db)):

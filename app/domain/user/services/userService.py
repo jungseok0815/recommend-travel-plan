@@ -11,8 +11,14 @@ from app.db.redis import set_refresh_token, delete_refresh_token
 logger = logging.getLogger(__name__)
 
 
+def is_email_taken(db: Session, email: str) -> bool:
+    return db.query(User).filter(User.email == email).first() is not None
+
+
 def create_user(db: Session, user_data: UserCreate) -> UserResponse:
     logger.info(f"유저 생성 - email: {user_data.email}")
+    if is_email_taken(db, user_data.email):
+        raise HTTPException(status_code=409, detail="이미 사용 중인 이메일입니다")
     user = User(
         email=user_data.email,
         password=hash_password(user_data.password),
