@@ -1,7 +1,7 @@
 import logging
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException
-from app.domain.trip.models.tripModel import Trip
+from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule
 from app.domain.trip.schema.tripSchema import TripCreate, TripResponse
 from app.domain.user.models.userModel import User
 
@@ -18,7 +18,6 @@ def create_trip(db: Session, user_id: int, trip_data: TripCreate) -> TripRespons
         end_datetime   = trip_data.end_datetime,
         group_size     = trip_data.group_size,
         budget         = trip_data.budget,
-        itinerary      = None
     )
     db.add(trip)
     db.commit()
@@ -28,12 +27,22 @@ def create_trip(db: Session, user_id: int, trip_data: TripCreate) -> TripRespons
 
 def get_trip_list(db: Session, user_id: int) -> list[TripResponse]:
     logger.info(f"여행 일정 목록 조회 - user_id: {user_id}")
-    return db.query(Trip).filter(Trip.user_id == user_id).all()
+    return (
+        db.query(Trip)
+        .options(joinedload(Trip.days).joinedload(TripDay.schedules))
+        .filter(Trip.user_id == user_id)
+        .all()
+    )
 
 
 def get_trip(db: Session, user_id: int, trip_id: int) -> TripResponse:
     logger.info(f"여행 일정 조회 - user_id: {user_id}, trip_id: {trip_id}")
-    trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == user_id).first()
+    trip = (
+        db.query(Trip)
+        .options(joinedload(Trip.days).joinedload(TripDay.schedules))
+        .filter(Trip.id == trip_id, Trip.user_id == user_id)
+        .first()
+    )
     if trip is None:
         raise HTTPException(status_code=404, detail="여행 일정을 찾을 수 없습니다")
     return trip
@@ -48,8 +57,32 @@ def get_community_trips(db: Session, user_id: int) -> list[dict]:
         .order_by(Trip.id.desc())
         .all()
     )
-    return [
-        {
+
+    result = []
+    for trip, email in rows:
+        days_data = []
+        for day in trip.days:
+            days_data.append({
+                "id": day.id,
+                "day": day.day,
+                "date": day.date,
+                "day_cost": day.day_cost,
+                "schedules": [
+                    {
+                        "id": s.id,
+                        "time": s.time,
+                        "activity": s.activity,
+                        "location": s.location,
+                        "transport": s.transport,
+                        "duration": s.duration,
+                        "cost": s.cost,
+                        "remaining_budget": s.remaining_budget,
+                        "note": s.note,
+                    }
+                    for s in day.schedules
+                ],
+            })
+        result.append({
             "id": trip.id,
             "destination": trip.destination,
             "transport": trip.transport,
@@ -59,6 +92,6 @@ def get_community_trips(db: Session, user_id: int) -> list[dict]:
             "budget": trip.budget,
             "total_cost": trip.total_cost,
             "user_email": email,
-        }
-        for trip, email in rows
-    ]
+            "days": days_data,
+        })
+    return result
