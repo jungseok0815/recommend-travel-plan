@@ -3,10 +3,13 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.domain.user.schema.userSchema import UserCreate, UserLogin, TokenResponse
-from app.domain.user.schema.userSchema import UserCreate, UserLogin, TokenResponse, UserUpdate
+from app.domain.user.schema.userSchema import UserCreate, UserLogin, TokenResponse, UserUpdate, RefreshTokenRequest
 from app.domain.user.services.userService import create_user, login_user, select_user, logout_user, is_email_taken, update_user
 from app.domain.user.services.oauthService import get_naver_login_url, auth_naver_login, get_kakao_login_url, auth_kakao_login
+from app.dependencies.auth import verify_refresh_token
+from app.core.security import create_access_token, create_refresh_token
+from app.db.redis import set_refresh_token
+from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +67,19 @@ def update(request: Request, user_data: UserUpdate, db: Session = Depends(get_db
     user_id = request.state.user_id
     logger.info(f"유저 수정 요청 - user_id: {user_id}")
     return update_user(db, int(user_id), user_data)
+
+@router.post("/token/refresh")
+def refresh_token(body: RefreshTokenRequest):
+    user_id = verify_refresh_token(body.refresh_token)
+    if user_id is None:
+        raise HTTPException(status_code=401, detail="유효하지 않은 리프레시 토큰입니다")
+
+    new_access_token = create_access_token({"sub": user_id})
+    new_refresh_token = create_refresh_token({"sub": user_id})
+    set_refresh_token(int(user_id), new_refresh_token)
+
+    logger.info(f"토큰 갱신 - user_id: {user_id}")
+    return {"access_token": new_access_token, "refresh_token": new_refresh_token, "token_type": "bearer"}
 
 @router.post("/logout")
 def logout(request: Request):
