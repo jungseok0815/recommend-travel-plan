@@ -49,6 +49,7 @@ def root():
 PUBLIC_PATHS = [
       "/",
       "/user/login",
+      "/user/me",
       "/user/signup",
       "/user/check-email",
       "/user/token/refresh",

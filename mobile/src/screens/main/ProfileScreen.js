@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { clearTokens } from '../../utils/tokenStorage';
+import { getMe } from '../../services/authService';
 
 const MenuItem = ({ icon, label, onPress, danger }) => (
   <TouchableOpacity style={styles.menuItem} onPress={onPress}>
@@ -12,6 +13,16 @@ const MenuItem = ({ icon, label, onPress, danger }) => (
 );
 
 export default function ProfileScreen({ navigation }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getMe()
+      .then(setUser)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   const handleLogout = () => {
     Alert.alert('로그아웃', '정말 로그아웃 하시겠어요?', [
       { text: '취소', style: 'cancel' },
@@ -37,10 +48,14 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.avatar}>
           <Ionicons name="person" size={32} color="#9CA3AF" />
         </View>
-        <View>
-          <Text style={styles.profileName}>여행자</Text>
-          <Text style={styles.profileEmail}>이메일을 불러오는 중...</Text>
-        </View>
+        {loading ? (
+          <ActivityIndicator color="#111827" />
+        ) : (
+          <View>
+            <Text style={styles.profileEmail}>{user?.email ?? '-'}</Text>
+            <Text style={styles.profileAddress}>{user?.address ?? '-'}</Text>
+          </View>
+        )}
       </View>
 
       {/* 메뉴 */}
@@ -91,8 +106,8 @@ const styles = StyleSheet.create({
     width: 56, height: 56, borderRadius: 28,
     backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center',
   },
-  profileName: { fontSize: 17, fontWeight: '600', color: '#111827', marginBottom: 3 },
-  profileEmail: { fontSize: 13, color: '#9CA3AF' },
+  profileEmail: { fontSize: 15, fontWeight: '600', color: '#111827', marginBottom: 3 },
+  profileAddress: { fontSize: 13, color: '#9CA3AF' },
 
   menuGroup: { marginHorizontal: 22, marginBottom: 20 },
   menuGroupTitle: { fontSize: 12, fontWeight: '600', color: '#9CA3AF', letterSpacing: 0.5, marginBottom: 8, textTransform: 'uppercase' },

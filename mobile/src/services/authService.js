@@ -87,6 +87,13 @@ export const login = async (email, password) => {
   return data; // { access_token, refresh_token, token_type }
 };
 
+export const getMe = async () => {
+  const res = await request('/user/me');
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '유저 정보를 불러올 수 없습니다');
+  return data; // { id, email, address }
+};
+
 export const openNaverLogin = async () => {
   const res = await fetch(`${BASE_URL}/user/auth/naver`);
   const data = await res.json();
