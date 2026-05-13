@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
@@ -8,10 +8,19 @@ import { saveTokens } from '../utils/tokenStorage';
 
 const DEV_MODE = true; // DB 연결 후 false로 변경
 
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
+
+  useEffect(() => {
+    if (route.params?.signupSuccess) {
+      setShowSuccessBanner(true);
+      const timer = setTimeout(() => setShowSuccessBanner(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [route.params?.signupSuccess]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -48,6 +57,11 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+      {showSuccessBanner && (
+        <View style={styles.successBanner}>
+          <Text style={styles.successBannerText}>✓ 회원가입이 완료되었습니다. 로그인해주세요.</Text>
+        </View>
+      )}
       <View style={styles.inner}>
 
         <View style={styles.header}>
@@ -124,6 +138,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  successBanner: {
+    backgroundColor: '#ECFDF5',
+    borderBottomWidth: 1,
+    borderBottomColor: '#A7F3D0',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+  },
+  successBannerText: {
+    color: '#065F46',
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
   },
   inner: {
     flex: 1,

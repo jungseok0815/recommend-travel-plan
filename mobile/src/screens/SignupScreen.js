@@ -85,9 +85,7 @@ export default function SignupScreen({ navigation }) {
     setLoading(true);
     try {
       await signup(email, password, address);
-      Alert.alert('가입 완료', '로그인해주세요', [
-        { text: '확인', onPress: () => navigation.navigate('Login') },
-      ]);
+      navigation.replace('Login', { signupSuccess: true });
     } catch (e) {
       Alert.alert('회원가입 실패', e.message);
     } finally {
