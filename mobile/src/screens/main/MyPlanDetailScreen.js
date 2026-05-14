@@ -5,7 +5,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { saveReview, getParticipants, addParticipant, removeParticipant, getMe } from '../../services/authService';
+import { saveReview, getParticipants, addParticipant, removeParticipant, getMe } from '../../common/api';
 
 const USE_DUMMY = true;
 

@@ -3,7 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView,
 } from 'react-native';
-import { signup, checkEmailDuplicate } from '../services/authService';
+import { signup, checkEmailDuplicate } from '../common/api';
 
 export default function SignupScreen({ navigation }) {
   const [email, setEmail] = useState('');

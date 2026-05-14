@@ -4,7 +4,7 @@ import {
   SafeAreaView, StatusBar, Alert, ActivityIndicator, ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { createPreference, updatePreference, fetchPreferenceOptions } from '../services/preferenceService';
+import { createPreference, updatePreference, fetchPreferenceOptions } from '../common/api';
 
 export default function OnboardingScreen({ navigation, route }) {
   const isEditing = route?.params?.isEditing ?? false;

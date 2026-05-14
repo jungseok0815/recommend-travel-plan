@@ -3,9 +3,8 @@ import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { login, openNaverLogin, openKakaoLogin } from '../services/authService';
+import { login, openNaverLogin, openKakaoLogin, getPreference } from '../common/api';
 import { saveTokens } from '../utils/tokenStorage';
-import { getPreference } from '../services/preferenceService';
 
 export default function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState('');

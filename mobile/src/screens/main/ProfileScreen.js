@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { clearTokens } from '../../utils/tokenStorage';
-import { getMe } from '../../services/authService';
+import { getMe, getPreference } from '../../common/api';
+
+const PREF_LABELS = {
+  travel_style:     '여행 스타일',
+  environment:      '선호 환경',
+  accommodation:    '숙박 유형',
+  interest:         '관심사',
+  travel_frequency: '여행 빈도',
+};
 
 const MenuItem = ({ icon, label, onPress, danger }) => (
   <TouchableOpacity style={styles.menuItem} onPress={onPress}>
@@ -13,14 +21,18 @@ const MenuItem = ({ icon, label, onPress, danger }) => (
 );
 
 export default function ProfileScreen({ navigation }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser]           = useState(null);
+  const [preference, setPreference] = useState(null);
+  const [loading, setLoading]     = useState(true);
 
   useEffect(() => {
-    getMe()
-      .then(setUser)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    Promise.all([
+      getMe().catch(() => null),
+      getPreference().catch(() => null),
+    ]).then(([u, p]) => {
+      setUser(u);
+      setPreference(p);
+    }).finally(() => setLoading(false));
   }, []);
 
   const handleLogout = () => {
@@ -37,7 +49,7 @@ export default function ProfileScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
       <View style={styles.header}>
         <Text style={styles.title}>프로필</Text>
@@ -58,11 +70,47 @@ export default function ProfileScreen({ navigation }) {
         )}
       </View>
 
+      {/* 취향 정보 */}
+      {!loading && (
+        <View style={styles.menuGroup}>
+          <Text style={styles.menuGroupTitle}>취향 정보</Text>
+          <View style={styles.menuCard}>
+            {preference ? (
+              <>
+                {Object.entries(PREF_LABELS).map(([key, label], idx, arr) => {
+                  const val = preference[key];
+                  const display = Array.isArray(val) ? val.join(', ') : val;
+                  return (
+                    <View key={key}>
+                      <View style={styles.prefRow}>
+                        <Text style={styles.prefLabel}>{label}</Text>
+                        <Text style={styles.prefValue}>{display || '-'}</Text>
+                      </View>
+                      {idx < arr.length - 1 && <View style={styles.menuDivider} />}
+                    </View>
+                  );
+                })}
+              </>
+            ) : (
+              <View style={styles.prefEmpty}>
+                <Text style={styles.prefEmptyText}>취향 정보가 없어요</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      )}
+
       {/* 메뉴 */}
       <View style={styles.menuGroup}>
         <Text style={styles.menuGroupTitle}>계정</Text>
         <View style={styles.menuCard}>
           <MenuItem icon="person-outline" label="내 정보 수정" onPress={() => navigation.navigate('EditProfile', { user })} />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="color-wand-outline"
+            label="취향 설정"
+            onPress={() => navigation.navigate('Onboarding', { isEditing: true, existing: preference })}
+          />
           <View style={styles.menuDivider} />
           <MenuItem icon="notifications-outline" label="알림 설정" onPress={() => navigation.navigate('NotificationSettings')} />
         </View>
@@ -75,12 +123,13 @@ export default function ProfileScreen({ navigation }) {
         </View>
       </View>
 
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9FAFB' },
+  scrollContent: { paddingBottom: 40 },
 
   header: { paddingHorizontal: 22, paddingTop: 60, paddingBottom: 20 },
   title: { fontSize: 24, fontWeight: '700', color: '#111827', letterSpacing: -0.5 },
@@ -128,5 +177,14 @@ const styles = StyleSheet.create({
   },
   menuLabel: { flex: 1, fontSize: 15, color: '#111827' },
   menuLabelDanger: { color: '#EF4444' },
-  menuDivider: { height: 1, backgroundColor: '#F3F4F6', marginLeft: 52 },
+  menuDivider: { height: 1, backgroundColor: '#F3F4F6', marginLeft: 18 },
+
+  prefRow: {
+    flexDirection: 'row', alignItems: 'flex-start',
+    paddingHorizontal: 18, paddingVertical: 14, gap: 12,
+  },
+  prefLabel: { fontSize: 14, color: '#9CA3AF', width: 80 },
+  prefValue: { flex: 1, fontSize: 14, color: '#111827', fontWeight: '500', flexWrap: 'wrap' },
+  prefEmpty: { paddingHorizontal: 18, paddingVertical: 20, alignItems: 'center' },
+  prefEmptyText: { fontSize: 14, color: '#9CA3AF' },
 });

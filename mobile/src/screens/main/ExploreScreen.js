@@ -5,7 +5,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getCommunityTrips } from '../../services/authService';
+import { getCommunityTrips } from '../../common/api';
 
 const REGION_MAP = {
   '서울': ['강남', '홍대·마포', '종로·광화문', '명동·을지로', '이태원·한남', '잠실·송파', '성수·건대'],
