@@ -6,11 +6,11 @@ import LoginScreen from './src/screens/LoginScreen';
 import SignupScreen from './src/screens/SignupScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import TabNavigator from './src/navigation/TabNavigator';
-import EditProfileScreen from './src/screens/main/EditProfileScreen';
-import NotificationSettingsScreen from './src/screens/main/NotificationSettingsScreen';
-import TripDetailScreen from './src/screens/main/TripDetailScreen';
-import MyPlanDetailScreen from './src/screens/main/MyPlanDetailScreen';
-import CreateTripScreen from './src/screens/main/CreateTripScreen';
+import EditProfileScreen from './src/screens/main/profile/EditProfileScreen';
+import NotificationSettingsScreen from './src/screens/main/profile/NotificationSettingsScreen';
+import TripDetailScreen from './src/screens/main/explore/TripDetailScreen';
+import MyPlanDetailScreen from './src/screens/main/trip/MyPlanDetailScreen';
+import CreateTripScreen from './src/screens/main/home/CreateTripScreen';
 import { getAccessToken } from './src/utils/tokenStorage';
 import { getPreference } from './src/common/api';
 
