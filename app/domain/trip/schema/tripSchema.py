@@ -84,6 +84,18 @@ class ParticipantResponse(BaseModel):
     is_owner : bool = False
 
 
+class TripStatusUpdate(BaseModel):
+    status: str
+
+
+class TripScheduleUpdate(BaseModel):
+    time     : str | None = None
+    activity : str | None = None
+    location : str | None = None
+    cost     : int | None = None
+    note     : str | None = None
+
+
 class TripReviewCreate(BaseModel):
     rating  : int
     content : str

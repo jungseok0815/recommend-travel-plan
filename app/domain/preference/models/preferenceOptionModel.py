@@ -4,7 +4,7 @@ from app.db.database import Base
 
 
 class PreferenceCategory(Base):
-    __tablename__ = "preference_categories"
+    __tablename__ = "PREFERENCE_CATEGORIES"
 
     id           = Column(Integer, primary_key=True, index=True)
     key          = Column(String(50), unique=True, nullable=False)
@@ -21,10 +21,10 @@ class PreferenceCategory(Base):
 
 
 class PreferenceOption(Base):
-    __tablename__ = "preference_options"
+    __tablename__ = "PREFERENCE_OPTIONS"
 
     id          = Column(Integer, primary_key=True, index=True)
-    category_id = Column(Integer, ForeignKey("preference_categories.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("PREFERENCE_CATEGORIES.id"), nullable=False)
     value       = Column(String(50), nullable=False)
     label       = Column(String(50), nullable=False)
     icon        = Column(String(50), nullable=False)

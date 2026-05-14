@@ -4,9 +4,9 @@ from sqlalchemy.sql import func
 from app.db.database import Base
 
 class Trip(Base):
-    __tablename__ = "Trips"
+    __tablename__ = "TRIPS"
     id               = Column(Integer, primary_key=True, index=True)
-    user_id          = Column(Integer, ForeignKey("Users.id"), nullable=False)
+    user_id          = Column(Integer, ForeignKey("USERS.id"), nullable=False)
     destination      = Column(String(100), nullable=False)
     transport        = Column(String(50), nullable=False)
     start_datetime   = Column(String(50), nullable=False)
@@ -23,10 +23,10 @@ class Trip(Base):
 
 
 class TripParticipant(Base):
-    __tablename__ = "TripParticipants"
+    __tablename__ = "TRIP_PARTICIPANTS"
     id        = Column(Integer, primary_key=True, index=True)
-    trip_id   = Column(Integer, ForeignKey("Trips.id"), nullable=False)
-    user_id   = Column(Integer, ForeignKey("Users.id"), nullable=False)
+    trip_id   = Column(Integer, ForeignKey("TRIPS.id"), nullable=False)
+    user_id   = Column(Integer, ForeignKey("USERS.id"), nullable=False)
     joined_at = Column(DateTime, server_default=func.now(), nullable=False)
 
     trip = relationship("Trip", back_populates="participants")
@@ -36,9 +36,9 @@ class TripParticipant(Base):
 
 
 class TripDay(Base):
-    __tablename__ = "TripDays"
+    __tablename__ = "TRIP_DAYS"
     id       = Column(Integer, primary_key=True, index=True)
-    trip_id  = Column(Integer, ForeignKey("Trips.id"), nullable=False)
+    trip_id  = Column(Integer, ForeignKey("TRIPS.id"), nullable=False)
     date     = Column(String(20), nullable=False)
     day      = Column(Integer, nullable=False)
     day_cost = Column(Integer, nullable=False)
@@ -48,9 +48,9 @@ class TripDay(Base):
 
 
 class TripSchedule(Base):
-    __tablename__ = "TripSchedules"
+    __tablename__ = "TRIP_SCHEDULES"
     id               = Column(Integer, primary_key=True, index=True)
-    trip_day_id      = Column(Integer, ForeignKey("TripDays.id"), nullable=False)
+    trip_day_id      = Column(Integer, ForeignKey("TRIP_DAYS.id"), nullable=False)
     time             = Column(String(10), nullable=False)
     activity         = Column(String(100), nullable=False)
     location         = Column(String(100), nullable=False)
@@ -64,10 +64,10 @@ class TripSchedule(Base):
 
 
 class TripReview(Base):
-    __tablename__ = "TripReviews"
+    __tablename__ = "TRIP_REVIEWS"
     id         = Column(Integer, primary_key=True, index=True)
-    trip_id    = Column(Integer, ForeignKey("Trips.id"), nullable=False, unique=True)
-    user_id    = Column(Integer, ForeignKey("Users.id"), nullable=False)
+    trip_id    = Column(Integer, ForeignKey("TRIPS.id"), nullable=False, unique=True)
+    user_id    = Column(Integer, ForeignKey("USERS.id"), nullable=False)
     rating     = Column(Integer, nullable=False)
     content    = Column(String(1000), nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)

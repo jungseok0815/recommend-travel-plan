@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from fastapi import HTTPException
 from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule, TripReview, TripParticipant
-from app.domain.trip.schema.tripSchema import TripCreate, TripResponse, TripReviewCreate, ParticipantResponse
+from app.domain.trip.schema.tripSchema import TripCreate, TripResponse, TripReviewCreate, ParticipantResponse, TripScheduleUpdate
 from app.domain.user.models.userModel import User
 
 logger = logging.getLogger(__name__)
@@ -143,6 +143,51 @@ def remove_participant(db: Session, owner_id: int, trip_id: int, target_user_id:
 
     db.delete(row)
     db.commit()
+
+
+def update_trip_status(db: Session, user_id: int, trip_id: int, status: str) -> Trip:
+    logger.info(f"여행 상태 변경 - user_id: {user_id}, trip_id: {trip_id}, status: {status}")
+    trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == user_id).first()
+    if trip is None:
+        raise HTTPException(status_code=404, detail="여행 일정을 찾을 수 없습니다")
+    trip.status = status
+    db.commit()
+    db.refresh(trip)
+    return trip
+
+
+def delete_trip(db: Session, user_id: int, trip_id: int):
+    logger.info(f"여행 삭제 - user_id: {user_id}, trip_id: {trip_id}")
+    trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == user_id).first()
+    if trip is None:
+        raise HTTPException(status_code=404, detail="여행 일정을 찾을 수 없습니다")
+    db.delete(trip)
+    db.commit()
+
+
+def update_schedule(db: Session, user_id: int, trip_id: int, schedule_id: int, data: TripScheduleUpdate) -> TripSchedule:
+    logger.info(f"일정 수정 - user_id: {user_id}, trip_id: {trip_id}, schedule_id: {schedule_id}")
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if trip is None:
+        raise HTTPException(status_code=404, detail="여행 일정을 찾을 수 없습니다")
+    if not _is_accessible(db, trip, user_id):
+        raise HTTPException(status_code=403, detail="접근 권한이 없습니다")
+
+    schedule = db.query(TripSchedule).filter(TripSchedule.id == schedule_id).first()
+    if schedule is None:
+        raise HTTPException(status_code=404, detail="일정을 찾을 수 없습니다")
+
+    for field, value in data.model_dump(exclude_none=True).items():
+        setattr(schedule, field, value)
+
+    if data.cost is not None:
+        day = db.query(TripDay).filter(TripDay.id == schedule.trip_day_id).first()
+        if day:
+            day.day_cost = sum(s.cost for s in day.schedules)
+
+    db.commit()
+    db.refresh(schedule)
+    return schedule
 
 
 # ── 커뮤니티 / 리뷰 ─────────────────────────────────────────
