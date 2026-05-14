@@ -2,12 +2,19 @@ import logging
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.domain.preference.schema.preferenceSchema import PreferenceCreate, PreferenceResponse
-from app.domain.preference.services.preferenceService import create_preference, get_preference, update_preference
+from app.domain.preference.schema.preferenceSchema import PreferenceCreate, PreferenceResponse, PreferenceCategoryResponse
+from app.domain.preference.services.preferenceService import create_preference, get_preference, update_preference, get_preference_options
+from typing import List
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/preference")
+
+
+@router.get("/options", response_model=List[PreferenceCategoryResponse])
+def get_options(db: Session = Depends(get_db)):
+    logger.info("GET /preference/options")
+    return get_preference_options(db)
 
 
 @router.post("", response_model=PreferenceResponse)

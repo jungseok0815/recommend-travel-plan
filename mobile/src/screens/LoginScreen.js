@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { login, openNaverLogin, openKakaoLogin } from '../services/authService';
 import { saveTokens } from '../utils/tokenStorage';
+import { getPreference } from '../services/preferenceService';
 
 export default function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState('');
@@ -20,6 +21,15 @@ export default function LoginScreen({ navigation, route }) {
     }
   }, [route.params?.signupSuccess]);
 
+  const navigateAfterLogin = async () => {
+    try {
+      const pref = await getPreference();
+      navigation.replace(pref ? 'Main' : 'Onboarding');
+    } catch {
+      navigation.replace('Main');
+    }
+  };
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('알림', '이메일과 비밀번호를 입력해주세요');
@@ -29,7 +39,7 @@ export default function LoginScreen({ navigation, route }) {
     try {
       const { access_token, refresh_token } = await login(email, password);
       await saveTokens(access_token, refresh_token);
-      navigation.replace('Main');
+      await navigateAfterLogin();
     } catch (e) {
       Alert.alert('로그인 실패', e.message);
     } finally {
@@ -42,7 +52,7 @@ export default function LoginScreen({ navigation, route }) {
       const result = await openNaverLogin();
       if (result?.access_token) {
         await saveTokens(result.access_token, result.refresh_token);
-        navigation.replace('Main');
+        await navigateAfterLogin();
       }
     } catch (e) {
       Alert.alert('오류', '네이버 로그인을 열 수 없습니다');
@@ -54,7 +64,7 @@ export default function LoginScreen({ navigation, route }) {
       const result = await openKakaoLogin();
       if (result?.access_token) {
         await saveTokens(result.access_token, result.refresh_token);
-        navigation.replace('Main');
+        await navigateAfterLogin();
       }
     } catch (e) {
       Alert.alert('오류', '카카오 로그인을 열 수 없습니다');

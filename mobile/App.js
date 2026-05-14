@@ -4,12 +4,14 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './src/screens/LoginScreen';
 import SignupScreen from './src/screens/SignupScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
 import TabNavigator from './src/navigation/TabNavigator';
 import EditProfileScreen from './src/screens/main/EditProfileScreen';
 import NotificationSettingsScreen from './src/screens/main/NotificationSettingsScreen';
 import TripDetailScreen from './src/screens/main/TripDetailScreen';
 import MyPlanDetailScreen from './src/screens/main/MyPlanDetailScreen';
 import { getAccessToken } from './src/utils/tokenStorage';
+import { getPreference } from './src/services/preferenceService';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,7 +24,16 @@ export default function App() {
 
   const checkToken = async () => {
     const token = await getAccessToken();
-    setInitialRoute(token ? 'Main' : 'Login');
+    if (!token) {
+      setInitialRoute('Login');
+      return;
+    }
+    try {
+      const pref = await getPreference();
+      setInitialRoute(pref ? 'Main' : 'Onboarding');
+    } catch (e) {
+      setInitialRoute(e.message === 'SESSION_EXPIRED' ? 'Login' : 'Main');
+    }
   };
 
   if (!initialRoute) {
@@ -38,6 +49,7 @@ export default function App() {
       <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Signup" component={SignupScreen} />
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Main" component={TabNavigator} />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
