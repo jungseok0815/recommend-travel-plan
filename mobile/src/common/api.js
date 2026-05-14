@@ -135,6 +135,14 @@ export const openKakaoLogin = async () => {
 
 // ── Trip ─────────────────────────────────────────────────────
 
+// 내 여행 일정 목록 조회 (내가 만들었거나 동행자로 참여한 일정 포함)
+export const getTripList = async () => {
+  const res = await request('/trip');
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '여행 목록을 불러올 수 없습니다');
+  return data;
+};
+
 // 다른 사용자들의 여행 일정 목록 조회 (탐색 화면)
 export const getCommunityTrips = async () => {
   const res = await request('/trip/community');
