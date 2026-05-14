@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.database import Base
@@ -17,8 +17,22 @@ class Trip(Base):
     remaining_budget = Column(Integer, nullable=True)
     status           = Column(String(20), nullable=False, default='계획 중')
 
-    days   = relationship("TripDay", back_populates="trip")
-    review = relationship("TripReview", back_populates="trip", uselist=False)
+    days         = relationship("TripDay", back_populates="trip")
+    review       = relationship("TripReview", back_populates="trip", uselist=False)
+    participants = relationship("TripParticipant", back_populates="trip", cascade="all, delete-orphan")
+
+
+class TripParticipant(Base):
+    __tablename__ = "TripParticipants"
+    id        = Column(Integer, primary_key=True, index=True)
+    trip_id   = Column(Integer, ForeignKey("Trips.id"), nullable=False)
+    user_id   = Column(Integer, ForeignKey("Users.id"), nullable=False)
+    joined_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+    trip = relationship("Trip", back_populates="participants")
+    user = relationship("User")
+
+    __table_args__ = (UniqueConstraint("trip_id", "user_id", name="uq_trip_participant"),)
 
 
 class TripDay(Base):

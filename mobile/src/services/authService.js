@@ -165,4 +165,30 @@ export const fetchReview = async (tripId) => {
   return data;
 };
 
+export const getParticipants = async (tripId) => {
+  const res = await request(`/trip/${tripId}/participants`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '참여자 목록을 불러올 수 없습니다');
+  return data;
+};
+
+export const addParticipant = async (tripId, email) => {
+  const res = await request(`/trip/${tripId}/participants`, {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '참여자 추가에 실패했습니다');
+  return data;
+};
+
+export const removeParticipant = async (tripId, userId) => {
+  const res = await request(`/trip/${tripId}/participants/${userId}`, {
+    method: 'DELETE',
+  });
+  if (res.status === 204) return;
+  const data = await res.json();
+  throw new Error(data.detail || '참여자 제거에 실패했습니다');
+};
+
 export { request };

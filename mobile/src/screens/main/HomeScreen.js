@@ -12,7 +12,28 @@ export default function HomeScreen() {
   const [endDate, setEndDate] = useState('');
   const [people, setPeople] = useState(2);
   const [budget, setBudget] = useState('');
+  const [participantEmail, setParticipantEmail] = useState('');
+  const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const handleAddParticipant = () => {
+    const email = participantEmail.trim();
+    if (!email) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Alert.alert('알림', '올바른 이메일 형식을 입력해주세요');
+      return;
+    }
+    if (participants.includes(email)) {
+      Alert.alert('알림', '이미 추가된 이메일입니다');
+      return;
+    }
+    setParticipants(prev => [...prev, email]);
+    setParticipantEmail('');
+  };
+
+  const handleRemoveParticipant = (email) => {
+    setParticipants(prev => prev.filter(e => e !== email));
+  };
 
   const handleGenerate = async () => {
     if (!departure || !destination || !startDate || !endDate) {
@@ -21,6 +42,7 @@ export default function HomeScreen() {
     }
     setLoading(true);
     // TODO: 백엔드 AI 플랜 생성 API 연동
+    // 전달 데이터: { departure, destination, startDate, endDate, people, budget, participant_emails: participants }
     setTimeout(() => {
       setLoading(false);
       Alert.alert('준비 중', 'AI 여행 계획 생성 기능은 백엔드 연동 후 사용 가능합니다');
@@ -140,6 +162,43 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        <View style={styles.rowDivider} />
+
+        {/* 동행자 */}
+        <View style={styles.participantSection}>
+          <View style={styles.inputRow}>
+            <View style={styles.iconWrap}>
+              <Ionicons name="person-add-outline" size={18} color="#9CA3AF" />
+            </View>
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              placeholder="동행자 이메일 (선택)"
+              placeholderTextColor="#9CA3AF"
+              value={participantEmail}
+              onChangeText={setParticipantEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              onSubmitEditing={handleAddParticipant}
+              returnKeyType="done"
+            />
+            <TouchableOpacity style={styles.addEmailBtn} onPress={handleAddParticipant}>
+              <Ionicons name="add" size={18} color="#2563EB" />
+            </TouchableOpacity>
+          </View>
+          {participants.length > 0 && (
+            <View style={styles.participantChips}>
+              {participants.map((email) => (
+                <View key={email} style={styles.participantChip}>
+                  <Text style={styles.participantChipText}>{email}</Text>
+                  <TouchableOpacity onPress={() => handleRemoveParticipant(email)}>
+                    <Ionicons name="close" size={14} color="#6B7280" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
       </View>
 
       {/* 생성 버튼 */}
@@ -200,6 +259,21 @@ const styles = StyleSheet.create({
   dateSep: { marginHorizontal: 8, color: '#9CA3AF', fontSize: 14 },
   budgetUnit: { fontSize: 13, color: '#6B7280', fontWeight: '500' },
   rowDivider: { height: 1, backgroundColor: '#F3F4F6', marginLeft: 28 },
+
+  participantSection: { paddingBottom: 6 },
+  addEmailBtn: {
+    padding: 6, marginLeft: 4,
+  },
+  participantChips: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 8,
+    paddingHorizontal: 36, paddingBottom: 10,
+  },
+  participantChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: '#EFF6FF', borderRadius: 20,
+    paddingHorizontal: 10, paddingVertical: 5,
+  },
+  participantChipText: { fontSize: 12, color: '#2563EB', fontWeight: '500' },
 
   peopleLabel: { flex: 1, fontSize: 15, color: '#111827' },
   counterWrap: { flexDirection: 'row', alignItems: 'center', gap: 12 },

@@ -9,12 +9,13 @@ class Transport(str, Enum):
 
 
 class TripCreate(BaseModel):
-    destination    : str
-    transport      : Transport
-    start_datetime : str
-    end_datetime   : str
-    group_size     : int
-    budget         : int
+    destination        : str
+    transport          : Transport
+    start_datetime     : str
+    end_datetime       : str
+    group_size         : int
+    budget             : int
+    participant_emails : list[str] = []
 
 
 class TripScheduleResponse(BaseModel):
@@ -70,6 +71,17 @@ class CommunityTripResponse(BaseModel):
     status         : str = '계획 중'
     user_email     : str
     days           : list[TripDayResponse] = []
+
+
+class AddParticipantRequest(BaseModel):
+    email: str
+
+
+class ParticipantResponse(BaseModel):
+    user_id  : int
+    email    : str
+    address  : str | None = None
+    is_owner : bool = False
 
 
 class TripReviewCreate(BaseModel):

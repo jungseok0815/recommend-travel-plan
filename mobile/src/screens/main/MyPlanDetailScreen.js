@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
   SafeAreaView, Alert, Modal, TextInput, KeyboardAvoidingView, Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { saveReview } from '../../services/authService';
+import { saveReview, getParticipants, addParticipant, removeParticipant, getMe } from '../../services/authService';
 
 const USE_DUMMY = true;
 
@@ -180,6 +181,66 @@ function EditModal({ visible, schedule, onSave, onClose }) {
   );
 }
 
+function InviteModal({ visible, onInvite, onClose }) {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleInvite = async () => {
+    if (!email.trim()) return;
+    setLoading(true);
+    try {
+      await onInvite(email.trim());
+      setEmail('');
+      onClose();
+    } catch (e) {
+      Alert.alert('오류', e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalOverlay}>
+        <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
+        <View style={styles.modalSheet}>
+          <View style={styles.modalHandle} />
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>동행자 초대</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={22} color="#111827" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.modalBody}>
+            <Text style={styles.fieldLabel}>이메일</Text>
+            <TextInput
+              style={styles.fieldInput}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="초대할 사용자 이메일을 입력하세요"
+              placeholderTextColor="#9CA3AF"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoFocus
+            />
+          </View>
+          <View style={styles.modalFooter}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+              <Text style={styles.cancelBtnText}>취소</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.saveBtn} onPress={handleInvite} disabled={loading}>
+              {loading
+                ? <ActivityIndicator color="#fff" size="small" />
+                : <Text style={styles.saveBtnText}>초대하기</Text>
+              }
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
 export default function MyPlanDetailScreen({ navigation, route }) {
   const { trip } = route.params;
   const [days, setDays] = useState(trip.days ?? []);
@@ -187,6 +248,40 @@ export default function MyPlanDetailScreen({ navigation, route }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [review, setReview] = useState(trip.review ?? null);
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [participants, setParticipants] = useState([]);
+  const [inviteModalVisible, setInviteModalVisible] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+
+  useEffect(() => {
+    if (!USE_DUMMY) {
+      getMe().then(u => setCurrentUserId(u.id)).catch(() => {});
+      getParticipants(trip.id).then(setParticipants).catch(() => {});
+    }
+  }, []);
+
+  const isOwner = currentUserId === trip.user_id;
+
+  const handleInvite = async (email) => {
+    const newP = await addParticipant(trip.id, email);
+    setParticipants(prev => [...prev, newP]);
+  };
+
+  const handleRemoveParticipant = (p) => {
+    Alert.alert('동행자 제거', `${p.email}을 제거할까요?`, [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '제거', style: 'destructive',
+        onPress: async () => {
+          try {
+            await removeParticipant(trip.id, p.user_id);
+            setParticipants(prev => prev.filter(x => x.user_id !== p.user_id));
+          } catch (e) {
+            Alert.alert('오류', e.message);
+          }
+        },
+      },
+    ]);
+  };
 
   const currentSchedule =
     editTarget != null
@@ -320,7 +415,59 @@ export default function MyPlanDetailScreen({ navigation, route }) {
           )}
         </View>
 
-        {/* 일정 */}
+        {/* 동행자 */}
+        <View style={styles.section}>
+          <View style={styles.participantSectionHeader}>
+            <Text style={styles.sectionTitle}>동행자</Text>
+            {isOwner && (
+              <TouchableOpacity
+                style={styles.inviteBtn}
+                onPress={() => setInviteModalVisible(true)}
+              >
+                <Ionicons name="person-add-outline" size={15} color="#2563EB" />
+                <Text style={styles.inviteBtnText}>초대</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          {participants.length === 0 ? (
+            <View style={styles.participantEmpty}>
+              <Ionicons name="people-outline" size={32} color="#D1D5DB" />
+              <Text style={styles.participantEmptyText}>동행자가 없어요</Text>
+            </View>
+          ) : (
+            <View style={styles.participantCard}>
+              {participants.map((p) => (
+                <View key={p.user_id} style={styles.participantRow}>
+                  <View style={styles.participantAvatar}>
+                    <Text style={styles.participantAvatarText}>
+                      {p.email[0].toUpperCase()}
+                    </Text>
+                  </View>
+                  <View style={styles.participantInfo}>
+                    <Text style={styles.participantEmail}>{p.email}</Text>
+                    {p.address ? (
+                      <Text style={styles.participantAddress}>{p.address}</Text>
+                    ) : null}
+                  </View>
+                  {p.is_owner ? (
+                    <View style={styles.ownerBadge}>
+                      <Text style={styles.ownerBadgeText}>방장</Text>
+                    </View>
+                  ) : isOwner ? (
+                    <TouchableOpacity
+                      style={styles.removeBtn}
+                      onPress={() => handleRemoveParticipant(p)}
+                    >
+                      <Ionicons name="close-circle-outline" size={22} color="#EF4444" />
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* 리뷰 */}
         {trip.status === '완료' && (
           <View style={styles.section}>
             <View style={styles.reviewSectionHeader}>
@@ -398,6 +545,11 @@ export default function MyPlanDetailScreen({ navigation, route }) {
         )}
       </ScrollView>
 
+      <InviteModal
+        visible={inviteModalVisible}
+        onInvite={handleInvite}
+        onClose={() => setInviteModalVisible(false)}
+      />
       <EditModal
         visible={modalVisible}
         schedule={currentSchedule}
@@ -508,6 +660,48 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
   reviewEmptyText: { fontSize: 13, color: '#9CA3AF', textAlign: 'center', lineHeight: 20 },
+
+  // 동행자
+  participantSectionHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+  },
+  inviteBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: '#EFF6FF', borderRadius: 20,
+    paddingHorizontal: 12, paddingVertical: 6,
+  },
+  inviteBtnText: { fontSize: 13, fontWeight: '600', color: '#2563EB' },
+  participantEmpty: {
+    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 28,
+    alignItems: 'center', gap: 10,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
+  },
+  participantEmptyText: { fontSize: 13, color: '#9CA3AF' },
+  participantCard: {
+    backgroundColor: '#FFFFFF', borderRadius: 16, overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
+  },
+  participantRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingHorizontal: 16, paddingVertical: 14,
+    borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
+  },
+  participantAvatar: {
+    width: 38, height: 38, borderRadius: 19,
+    backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center',
+  },
+  participantAvatarText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
+  participantInfo: { flex: 1, gap: 2 },
+  participantEmail: { fontSize: 14, fontWeight: '500', color: '#111827' },
+  participantAddress: { fontSize: 12, color: '#9CA3AF' },
+  ownerBadge: {
+    backgroundColor: '#111827', borderRadius: 20,
+    paddingHorizontal: 10, paddingVertical: 4,
+  },
+  ownerBadgeText: { fontSize: 11, fontWeight: '700', color: '#FFFFFF' },
+  removeBtn: { padding: 4 },
 
   // 모달
   modalOverlay: { flex: 1, justifyContent: 'flex-end' },

@@ -12,7 +12,7 @@ from app.db.redis import set_refresh_token
 from app.db.database import Base, engine, SessionLocal
 from app.domain.user.models.userModel import User
 from app.domain.user.models.socialAccountModel import SocialAccount
-from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule, TripReview
+from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule, TripReview, TripParticipant
 from app.domain.preference.models.preferenceModel import Preference
 from app.domain.preference.models.preferenceOptionModel import PreferenceCategory, PreferenceOption
 from app.domain.preference.seed import seed_preference_options

@@ -2,8 +2,16 @@ import logging
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.domain.trip.schema.tripSchema import TripCreate, TripResponse, CommunityTripResponse, TripReviewCreate, TripReviewResponse
-from app.domain.trip.services.tripService import create_trip, get_trip_list, get_trip, get_community_trips, create_or_update_review, get_review
+from app.domain.trip.schema.tripSchema import (
+    TripCreate, TripResponse, CommunityTripResponse,
+    TripReviewCreate, TripReviewResponse,
+    AddParticipantRequest, ParticipantResponse,
+)
+from app.domain.trip.services.tripService import (
+    create_trip, get_trip_list, get_trip, get_community_trips,
+    create_or_update_review, get_review,
+    get_participants, add_participant, remove_participant,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +44,27 @@ def get_one(trip_id: int, request: Request, db: Session = Depends(get_db)):
     user_id = request.state.user_id
     logger.info(f"GET /trip/{trip_id} - user_id: {user_id}")
     return get_trip(db, int(user_id), trip_id)
+
+
+@router.get("/{trip_id}/participants", response_model=list[ParticipantResponse])
+def list_participants(trip_id: int, request: Request, db: Session = Depends(get_db)):
+    user_id = request.state.user_id
+    logger.info(f"GET /trip/{trip_id}/participants - user_id: {user_id}")
+    return get_participants(db, int(user_id), trip_id)
+
+
+@router.post("/{trip_id}/participants", response_model=ParticipantResponse)
+def invite_participant(trip_id: int, body: AddParticipantRequest, request: Request, db: Session = Depends(get_db)):
+    user_id = request.state.user_id
+    logger.info(f"POST /trip/{trip_id}/participants - owner: {user_id}, email: {body.email}")
+    return add_participant(db, int(user_id), trip_id, body.email)
+
+
+@router.delete("/{trip_id}/participants/{target_user_id}", status_code=204)
+def kick_participant(trip_id: int, target_user_id: int, request: Request, db: Session = Depends(get_db)):
+    user_id = request.state.user_id
+    logger.info(f"DELETE /trip/{trip_id}/participants/{target_user_id} - owner: {user_id}")
+    remove_participant(db, int(user_id), trip_id, target_user_id)
 
 
 @router.post("/{trip_id}/review", response_model=TripReviewResponse)
