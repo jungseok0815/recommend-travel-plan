@@ -4,9 +4,12 @@ import {
   SafeAreaView, StatusBar, Alert, ActivityIndicator, ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { createPreference, fetchPreferenceOptions } from '../services/preferenceService';
+import { createPreference, updatePreference, fetchPreferenceOptions } from '../services/preferenceService';
 
-export default function OnboardingScreen({ navigation }) {
+export default function OnboardingScreen({ navigation, route }) {
+  const isEditing = route?.params?.isEditing ?? false;
+  const existing  = route?.params?.existing  ?? null;
+
   const [steps, setSteps] = useState([]);
   const [optionsLoading, setOptionsLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
@@ -19,6 +22,18 @@ export default function OnboardingScreen({ navigation }) {
       .catch(() => Alert.alert('오류', '선택지를 불러오지 못했습니다'))
       .finally(() => setOptionsLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (existing) {
+      setAnswers({
+        travel_style:     existing.travel_style,
+        environment:      existing.environment,
+        accommodation:    existing.accommodation,
+        interest:         existing.interest,
+        travel_frequency: existing.travel_frequency,
+      });
+    }
+  }, [existing]);
 
   if (optionsLoading) {
     return (
@@ -69,14 +84,20 @@ export default function OnboardingScreen({ navigation }) {
     }
     setLoading(true);
     try {
-      await createPreference({
+      const body = {
         travel_style:     answers.travel_style,
         environment:      answers.environment,
         accommodation:    answers.accommodation,
         interest:         answers.interest,
         travel_frequency: answers.travel_frequency,
-      });
-      navigation.replace('Main');
+      };
+      if (isEditing) {
+        await updatePreference(body);
+        navigation.goBack();
+      } else {
+        await createPreference(body);
+        navigation.replace('Main');
+      }
     } catch (e) {
       Alert.alert('오류', e.message);
     } finally {
@@ -85,7 +106,10 @@ export default function OnboardingScreen({ navigation }) {
   };
 
   const handleBack = () => {
-    if (currentStep === 0) return;
+    if (currentStep === 0) {
+      if (isEditing) navigation.goBack();
+      return;
+    }
     setCurrentStep(prev => prev - 1);
   };
 
@@ -98,7 +122,7 @@ export default function OnboardingScreen({ navigation }) {
       {/* 상단 헤더 */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          {currentStep > 0 ? (
+          {(currentStep > 0 || isEditing) ? (
             <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
               <Ionicons name="chevron-back" size={24} color="#111827" />
             </TouchableOpacity>
@@ -195,7 +219,7 @@ export default function OnboardingScreen({ navigation }) {
           ) : (
             <View style={styles.nextBtnInner}>
               <Text style={styles.nextBtnText}>
-                {isLast ? '시작하기' : '다음'}
+                {isLast ? (isEditing ? '저장하기' : '시작하기') : '다음'}
               </Text>
               {!isLast && (
                 <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />

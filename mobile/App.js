@@ -10,6 +10,7 @@ import EditProfileScreen from './src/screens/main/EditProfileScreen';
 import NotificationSettingsScreen from './src/screens/main/NotificationSettingsScreen';
 import TripDetailScreen from './src/screens/main/TripDetailScreen';
 import MyPlanDetailScreen from './src/screens/main/MyPlanDetailScreen';
+import CreateTripScreen from './src/screens/main/CreateTripScreen';
 import { getAccessToken } from './src/utils/tokenStorage';
 import { getPreference } from './src/services/preferenceService';
 
@@ -55,6 +56,7 @@ export default function App() {
         <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
         <Stack.Screen name="TripDetail" component={TripDetailScreen} />
         <Stack.Screen name="MyPlanDetail" component={MyPlanDetailScreen} />
+        <Stack.Screen name="CreateTrip" component={CreateTripScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
