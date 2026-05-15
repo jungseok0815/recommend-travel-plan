@@ -12,7 +12,7 @@ import TripDetailScreen from './src/screens/main/explore/TripDetailScreen';
 import MyPlanDetailScreen from './src/screens/main/trip/MyPlanDetailScreen';
 import CreateTripScreen from './src/screens/main/home/CreateTripScreen';
 import { getAccessToken } from './src/utils/tokenStorage';
-import { getPreference } from './src/common/api';
+import { getPreference } from './src/common/preferenceApi';
 
 const Stack = createNativeStackNavigator();
 
