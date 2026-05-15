@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { getTripList } from '../../../common/api';
+import { getTripList } from '../../../common/tripApi';
 
 export default function HomeScreen({ navigation }) {
   const [trips, setTrips]       = useState([]);

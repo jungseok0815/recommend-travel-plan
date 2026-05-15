@@ -5,7 +5,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { saveReview, getParticipants, addParticipant, removeParticipant, getMe } from '../../../common/api';
+import { saveReview, getParticipants, addParticipant, removeParticipant } from '../../../common/tripApi';
+import { getMe } from '../../../common/userApi';
 
 function StarRating({ rating, onSelect, readonly = false }) {
   return (

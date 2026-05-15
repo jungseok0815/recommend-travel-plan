@@ -17,11 +17,11 @@ def create_preference(db: Session, user_id: int, preference_data: PreferenceCrea
 
     preference = Preference(
         user_id          = user_id,
-        travel_style     = ','.join(preference_data.travel_style),
-        environment      = preference_data.environment,
-        accommodation    = ','.join(preference_data.accommodation),
-        interest         = ','.join(preference_data.interest),
-        travel_frequency = preference_data.travel_frequency,
+        travel_style     = ','.join(v.value for v in preference_data.travel_style),
+        environment      = preference_data.environment.value,
+        accommodation    = ','.join(v.value for v in preference_data.accommodation),
+        interest         = ','.join(v.value for v in preference_data.interest),
+        travel_frequency = preference_data.travel_frequency.value,
     )
     db.add(preference)
     db.commit()
@@ -46,11 +46,11 @@ def update_preference(db: Session, user_id: int, preference_data: PreferenceCrea
     if preference is None:
         raise HTTPException(status_code=404, detail="취향 프로필이 없습니다")
 
-    preference.travel_style     = ','.join(preference_data.travel_style)
-    preference.environment      = preference_data.environment
-    preference.accommodation    = ','.join(preference_data.accommodation)
-    preference.interest         = ','.join(preference_data.interest)
-    preference.travel_frequency = preference_data.travel_frequency
+    preference.travel_style     = ','.join(v.value for v in preference_data.travel_style)
+    preference.environment      = preference_data.environment.value
+    preference.accommodation    = ','.join(v.value for v in preference_data.accommodation)
+    preference.interest         = ','.join(v.value for v in preference_data.interest)
+    preference.travel_frequency = preference_data.travel_frequency.value
 
     db.commit()
     db.refresh(preference)

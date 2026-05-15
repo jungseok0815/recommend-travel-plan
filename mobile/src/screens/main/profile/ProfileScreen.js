@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { clearTokens } from '../../../utils/tokenStorage';
-import { getMe, getPreference } from '../../../common/api';
+import { getMe } from '../../../common/userApi';
+import { getPreference } from '../../../common/preferenceApi';
 
 const PREF_LABELS = {
   travel_style:     '여행 스타일',

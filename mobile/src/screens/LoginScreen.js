@@ -3,7 +3,8 @@ import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { login, openNaverLogin, openKakaoLogin, getPreference } from '../common/api';
+import { login, openNaverLogin, openKakaoLogin } from '../common/userApi';
+import { getPreference } from '../common/preferenceApi';
 import { saveTokens } from '../utils/tokenStorage';
 
 export default function LoginScreen({ navigation, route }) {

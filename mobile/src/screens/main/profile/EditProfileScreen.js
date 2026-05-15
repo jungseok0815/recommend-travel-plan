@@ -4,7 +4,7 @@ import {
   StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { updateMe } from '../../../common/api';
+import { updateMe } from '../../../common/userApi';
 
 export default function EditProfileScreen({ navigation, route }) {
   const { user } = route.params ?? {};
