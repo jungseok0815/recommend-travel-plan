@@ -8,6 +8,7 @@ export const fetchPreferenceOptions = async () => {
 };
 
 export const getPreference = async () => {
+  console.log("start getPerference")
   const res = await request('/preference');
   if (res.status === 404) return null;
   const data = await res.json();

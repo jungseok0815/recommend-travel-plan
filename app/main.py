@@ -24,7 +24,12 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8081"],
+    allow_origins=[
+        "http://localhost:8081",
+        "http://localhost:19006",
+        "http://127.0.0.1:8081",
+        "http://127.0.0.1:19006",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -75,7 +80,11 @@ async def auth_middleware(request: Request, call_next):
     access_token = authorization.split(" ")[1]
     refresh_token = request.headers.get("Refresh-Token")
 
+    logging.info("access_token : %s", access_token)
+    logging.info("refresh_token : %s", refresh_token)
     access_result = decode_token(access_token)
+
+    logging.info(f"access_result : {access_result}")
 
     if access_result["status"] == "valid":
         request.state.user_id = access_result["payload"].get("sub")
@@ -86,10 +95,12 @@ async def auth_middleware(request: Request, call_next):
 
     if access_result["status"] == "expired":
         if not refresh_token:
+            logging.info(f"not use refresh token")
             return JSONResponse(status_code=401, content={"detail" : "재로그인이 필요합니다"})
 
         user_id = verify_refresh_token(refresh_token)
         if user_id is None:
+            logging.info(f"expired refresh token")
             return JSONResponse(status_code=401, content={"detail": "재로그인이 필요합니다"})
 
         new_access_token = create_access_token({"sub" : user_id})

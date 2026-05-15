@@ -70,6 +70,7 @@ def update(request: Request, user_data: UserUpdate, db: Session = Depends(get_db
 
 @router.post("/token/refresh")
 def refresh_token(body: RefreshTokenRequest):
+    logger.info("refresh token : ", body.refresh_token)
     user_id = verify_refresh_token(body.refresh_token)
     if user_id is None:
         raise HTTPException(status_code=401, detail="유효하지 않은 리프레시 토큰입니다")

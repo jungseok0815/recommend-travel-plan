@@ -13,6 +13,7 @@ import MyPlanDetailScreen from './src/screens/main/trip/MyPlanDetailScreen';
 import CreateTripScreen from './src/screens/main/home/CreateTripScreen';
 import { getAccessToken } from './src/utils/tokenStorage';
 import { getPreference } from './src/common/preferenceApi';
+import { navigationRef } from './src/utils/navigationRef';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,10 +26,8 @@ export default function App() {
 
   const checkToken = async () => {
     const token = await getAccessToken();
-    if (!token) {
-      setInitialRoute('Login');
-      return;
-    }
+    if (!token) return setInitialRoute('Login');
+    
     try {
       const pref = await getPreference();
       setInitialRoute(pref ? 'Main' : 'Onboarding');
@@ -46,7 +45,7 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Signup" component={SignupScreen} />
