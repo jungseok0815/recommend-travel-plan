@@ -48,20 +48,20 @@ export default function OnboardingScreen({ navigation, route }) {
   const step = steps[currentStep];
   const isLast = currentStep === steps.length - 1;
 
-  const getSelected = () => answers[step.key] ?? (step.multiSelect ? [] : null);
+  const getSelected = () => answers[step.key] ?? (step.multi_select ? [] : null);
 
   const hasSelection = () => {
     const sel = getSelected();
-    return step.multiSelect ? sel.length > 0 : sel !== null;
+    return step.multi_select ? sel.length > 0 : sel !== null;
   };
 
   const isOptionSelected = (value) => {
     const sel = getSelected();
-    return step.multiSelect ? sel.includes(value) : sel === value;
+    return step.multi_select ? sel.includes(value) : sel === value;
   };
 
   const handleSelect = (value) => {
-    if (step.multiSelect) {
+    if (step.multi_select) {
       setAnswers(prev => {
         const current = prev[step.key] ?? [];
         return {
@@ -113,7 +113,7 @@ export default function OnboardingScreen({ navigation, route }) {
     setCurrentStep(prev => prev - 1);
   };
 
-  const selectedCount = step.multiSelect ? (getSelected()).length : null;
+  const selectedCount = step.multi_select ? (getSelected()).length : null;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -156,7 +156,7 @@ export default function OnboardingScreen({ navigation, route }) {
             <View style={styles.stepBadge}>
               <Text style={styles.stepBadgeText}>STEP {currentStep + 1}</Text>
             </View>
-            {step.multiSelect && (
+            {step.multi_select && (
               <View style={styles.multiSelectBadge}>
                 <Ionicons name="checkmark-done-outline" size={12} color="#2563EB" />
                 <Text style={styles.multiSelectBadgeText}>복수 선택 가능</Text>
@@ -190,7 +190,7 @@ export default function OnboardingScreen({ navigation, route }) {
                     {opt.label}
                   </Text>
                   <Text style={[styles.optionDesc, selected && styles.optionDescSelected]}>
-                    {opt.desc}
+                    {opt.description}
                   </Text>
                 </View>
                 <View style={[styles.optionCheck, selected && styles.optionCheckSelected]}>
@@ -206,7 +206,7 @@ export default function OnboardingScreen({ navigation, route }) {
 
       {/* 하단 버튼 */}
       <View style={styles.footer}>
-        {step.multiSelect && selectedCount > 0 && (
+        {step.multi_select && selectedCount > 0 && (
           <Text style={styles.selectedCountText}>{selectedCount}개 선택됨</Text>
         )}
         <TouchableOpacity
