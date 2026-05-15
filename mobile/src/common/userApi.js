@@ -30,6 +30,10 @@ export const login = async (email, password) => {
   return data;
 };
 
+export const logout = async () => {
+  await request('/user/logout', { method: 'POST' });
+};
+
 export const getMe = async () => {
   const res = await request('/user/me');
   const data = await res.json();

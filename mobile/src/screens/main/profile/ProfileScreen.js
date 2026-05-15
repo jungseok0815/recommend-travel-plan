@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { clearTokens } from '../../../utils/tokenStorage';
-import { getMe } from '../../../common/userApi';
+import { getMe, logout } from '../../../common/userApi';
 import { getPreference } from '../../../common/preferenceApi';
+import { navigationRef } from '../../../utils/navigationRef';
 
 const PREF_LABELS = {
   travel_style:     '여행 스타일',
@@ -37,13 +38,15 @@ export default function ProfileScreen({ navigation }) {
   }, []);
 
   const handleLogout = () => {
+    console.log("test1234")
     Alert.alert('로그아웃', '정말 로그아웃 하시겠어요?', [
       { text: '취소', style: 'cancel' },
       {
         text: '로그아웃', style: 'destructive',
         onPress: async () => {
+          try { await logout(); } catch {}
           await clearTokens();
-          navigation.replace('Login');
+          navigationRef.reset({ index: 0, routes: [{ name: 'Login' }] });
         },
       },
     ]);
