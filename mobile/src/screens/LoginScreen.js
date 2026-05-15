@@ -11,6 +11,7 @@ export default function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
 
   useEffect(() => {
@@ -32,16 +33,17 @@ export default function LoginScreen({ navigation, route }) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('알림', '이메일과 비밀번호를 입력해주세요');
+      setErrorMessage('이메일과 비밀번호를 입력해주세요');
       return;
     }
     setLoading(true);
+    setErrorMessage('');
     try {
       const { access_token, refresh_token } = await login(email, password);
       await saveTokens(access_token, refresh_token);
       await navigateAfterLogin();
     } catch (e) {
-      Alert.alert('로그인 실패', e.message);
+      setErrorMessage(e.message);
     } finally {
       setLoading(false);
     }
@@ -103,6 +105,10 @@ export default function LoginScreen({ navigation, route }) {
             onChangeText={setPassword}
             secureTextEntry
           />
+
+          {errorMessage ? (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          ) : null}
 
           <TouchableOpacity style={styles.loginBtn} onPress={handleLogin} disabled={loading}>
             {loading
@@ -186,6 +192,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#111827',
     marginBottom: 12,
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 13,
+    marginBottom: 10,
+    textAlign: 'center',
   },
   loginBtn: {
     backgroundColor: '#111827',

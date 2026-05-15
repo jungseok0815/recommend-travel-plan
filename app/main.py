@@ -3,12 +3,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.security import decode_token, create_access_token, create_refresh_token
+from app.core.security import decode_token, create_access_token
 from app.domain.user.routers.userRouter import router as user_router
 from app.domain.trip.routers.tripRouter import router as trip_router
 from app.domain.preference.routers.preferenceRouter import router as preference_router
 from app.dependencies.auth import verify_refresh_token
-from app.db.redis import set_refresh_token
 from app.db.database import Base, engine
 from app.domain.user.models.userModel import User
 from app.domain.user.models.socialAccountModel import SocialAccount
@@ -87,18 +86,16 @@ async def auth_middleware(request: Request, call_next):
 
         user_id = verify_refresh_token(refresh_token)
         if user_id is None:
-            logging.info(f"expired refresh token")
+            logging.info("expired refresh token")
             return JSONResponse(status_code=401, content={"detail": "재로그인이 필요합니다"})
-        logging.info(f"not use refresh token{user_id}")
+
+        logging.info("refresh token valid, user_id: %s", user_id)
         new_access_token = create_access_token({"sub" : user_id})
-        new_refresh_token = create_refresh_token({"sub" : user_id})
-        set_refresh_token(int(user_id), new_refresh_token)
 
         request.state.user_id = user_id
 
         response = await call_next(request)
         response.headers["New-Access-Token"] = new_access_token
-        response.headers["New-Refresh-Token"] = new_refresh_token
         return response
 
 app.add_middleware(
