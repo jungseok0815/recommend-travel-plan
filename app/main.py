@@ -10,6 +10,7 @@ from app.domain.preference.routers.preferenceRouter import router as preference_
 from app.dependencies.auth import verify_refresh_token
 from app.db.redis import set_refresh_token
 from app.db.database import Base, engine, SessionLocal
+from app.initData import seed_init_data
 from app.domain.user.models.userModel import User
 from app.domain.user.models.socialAccountModel import SocialAccount
 from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule, TripReview, TripParticipant
@@ -19,6 +20,11 @@ from app.domain.preference.models.preferenceOptionModel import PreferenceCategor
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        seed_init_data(db)
+    finally:
+        db.close()
     yield
 
 app = FastAPI(lifespan=lifespan)

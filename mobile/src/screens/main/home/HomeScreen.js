@@ -7,42 +7,29 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { getTripList } from '../../../common/api';
 
-const RECENT_DUMMY = [
-  { id: 1, destination: '제주도', start_datetime: '2025-05-01', end_datetime: '2025-05-03', status: '완료' },
-  { id: 2, destination: '부산', start_datetime: '2025-06-10', end_datetime: '2025-06-12', status: '계획 중' },
-];
-
 export default function HomeScreen({ navigation }) {
   const [trips, setTrips]       = useState([]);
   const [loading, setLoading]   = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [fromServer, setFromServer] = useState(false);
 
   const fetchTrips = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     try {
       const data = await getTripList();
-      // 최근 3개만 표시
       setTrips(data.slice(0, 3));
-      setFromServer(true);
     } catch {
-      // API 실패 시 더미 데이터 유지
-      setTrips(RECENT_DUMMY);
-      setFromServer(false);
+      setTrips([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  // 탭 포커스될 때마다 새로고침
   useFocusEffect(
     useCallback(() => {
       fetchTrips();
     }, [])
   );
-
-  const displayTrips = trips.length > 0 ? trips : (fromServer ? [] : RECENT_DUMMY);
 
   return (
     <ScrollView
@@ -79,7 +66,7 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.loadingBox}>
             <ActivityIndicator color="#111827" />
           </View>
-        ) : displayTrips.length === 0 ? (
+        ) : trips.length === 0 ? (
           <View style={styles.emptyBox}>
             <Ionicons name="map-outline" size={36} color="#D1D5DB" />
             <Text style={styles.emptyText}>아직 여행 계획이 없어요</Text>
@@ -87,7 +74,7 @@ export default function HomeScreen({ navigation }) {
           </View>
         ) : (
           <View style={styles.recentList}>
-            {displayTrips.map((trip) => (
+            {trips.map((trip) => (
               <TouchableOpacity
                 key={trip.id}
                 style={styles.recentCard}

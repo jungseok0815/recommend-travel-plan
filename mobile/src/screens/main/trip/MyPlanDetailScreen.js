@@ -7,8 +7,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { saveReview, getParticipants, addParticipant, removeParticipant, getMe } from '../../../common/api';
 
-const USE_DUMMY = true;
-
 function StarRating({ rating, onSelect, readonly = false }) {
   return (
     <View style={{ flexDirection: 'row', gap: 6 }}>
@@ -253,10 +251,8 @@ export default function MyPlanDetailScreen({ navigation, route }) {
   const [currentUserId, setCurrentUserId] = useState(null);
 
   useEffect(() => {
-    if (!USE_DUMMY) {
-      getMe().then(u => setCurrentUserId(u.id)).catch(() => {});
-      getParticipants(trip.id).then(setParticipants).catch(() => {});
-    }
+    getMe().then(u => setCurrentUserId(u.id)).catch(() => {});
+    getParticipants(trip.id).then(setParticipants).catch(() => {});
   }, []);
 
   const isOwner = currentUserId === trip.user_id;
@@ -294,16 +290,12 @@ export default function MyPlanDetailScreen({ navigation, route }) {
   };
 
   const handleReviewSave = async (data) => {
-    if (!USE_DUMMY) {
-      try {
-        const saved = await saveReview(trip.id, data.rating, data.content);
-        setReview(saved);
-      } catch (e) {
-        Alert.alert('오류', e.message);
-        return;
-      }
-    } else {
-      setReview(data);
+    try {
+      const saved = await saveReview(trip.id, data.rating, data.content);
+      setReview(saved);
+    } catch (e) {
+      Alert.alert('오류', e.message);
+      return;
     }
     setReviewModalVisible(false);
   };
