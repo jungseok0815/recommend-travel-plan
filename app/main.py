@@ -89,7 +89,7 @@ async def auth_middleware(request: Request, call_next):
         if user_id is None:
             logging.info(f"expired refresh token")
             return JSONResponse(status_code=401, content={"detail": "재로그인이 필요합니다"})
-
+        logging.info(f"not use refresh token{user_id}")
         new_access_token = create_access_token({"sub" : user_id})
         new_refresh_token = create_refresh_token({"sub" : user_id})
         set_refresh_token(int(user_id), new_refresh_token)
@@ -98,7 +98,7 @@ async def auth_middleware(request: Request, call_next):
 
         response = await call_next(request)
         response.headers["New-Access-Token"] = new_access_token
-        response.headers["New-refresh-Token"] = new_refresh_token
+        response.headers["New-Refresh-Token"] = new_refresh_token
         return response
 
 app.add_middleware(
