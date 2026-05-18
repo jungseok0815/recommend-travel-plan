@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Text
 from app.db.database import Base
 
 class Preference(Base):
@@ -12,3 +12,4 @@ class Preference(Base):
     sub_A04            = Column(String(500), nullable=True)   # 쇼핑 세부 cat 코드 CSV
     food_types         = Column(String(500), nullable=True)   # 음식 타입 CSV
     accommodation_type = Column(String(500), nullable=True)   # 숙박 타입 CSV
+    embedding          = Column(Text,        nullable=True)   # JSON 직렬화된 768차원 벡터

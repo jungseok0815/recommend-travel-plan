@@ -15,12 +15,13 @@ from app.domain.user.services.userService import get_or_create_social_user
 logger = logging.getLogger(__name__)
 
 
-def get_naver_login_url() -> str:
+def get_naver_login_url(platform: str = "native") -> str:
+    state = f"{platform}:{secrets.token_urlsafe(16)}"
     params = {
         "client_id"    : NAVER_CLIENT_ID,
         "redirect_uri" : NAVER_REDIRECT_URI,
         "response_type": "code",
-        "state"        : secrets.token_urlsafe(16),
+        "state"        : state,
     }
     return f"https://nid.naver.com/oauth2.0/authorize?{urlencode(params)}"
 
@@ -64,11 +65,13 @@ def auth_naver_login(db: Session, code: str) -> TokenResponse:
     return TokenResponse(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
 
-def get_kakao_login_url() -> str:
+def get_kakao_login_url(platform: str = "native") -> str:
+    state = f"{platform}:{secrets.token_urlsafe(16)}"
     params = {
         "client_id"    : KAKAO_CLIENT_ID,
         "redirect_uri" : KAKAO_REDIRECT_URI,
         "response_type": "code",
+        "state"        : state,
     }
     return f"https://kauth.kakao.com/oauth/authorize?{urlencode(params)}"
 

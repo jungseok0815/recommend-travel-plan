@@ -44,3 +44,5 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 구글 제미나이 api
 """
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
+WEB_CALLBACK_URL = os.getenv("WEB_CALLBACK_URL", "http://localhost:8080/auth/callback")

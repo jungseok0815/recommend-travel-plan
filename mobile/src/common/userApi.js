@@ -48,26 +48,32 @@ export const updateMe = async (body) => {
   return data;
 };
 
-export const openNaverLogin = async () => {
-  const res = await fetch(`${BASE_URL}/user/auth/naver`);
-  const data = await res.json();
-  const result = await WebBrowser.openAuthSessionAsync(data.url, 'travelplanner://auth/callback');
+import { Platform } from 'react-native';
+
+const PLATFORM      = Platform.OS === 'web' ? 'web' : 'native';
+const REDIRECT_URL  = Platform.OS === 'web'
+  ? 'http://localhost:8080/auth/callback'
+  : 'travelplanner://auth/callback';
+
+function parseOAuthResult(result) {
   if (result.type !== 'success') return null;
   const params = Object.fromEntries(
     (result.url.split('?')[1] ?? '').split('&').map(p => p.split('=').map(decodeURIComponent))
   );
   if (!params.access_token) return null;
   return { access_token: params.access_token, refresh_token: params.refresh_token };
+}
+
+export const openNaverLogin = async () => {
+  const res = await fetch(`${BASE_URL}/user/auth/naver?platform=${PLATFORM}`);
+  const data = await res.json();
+  const result = await WebBrowser.openAuthSessionAsync(data.url, REDIRECT_URL);
+  return parseOAuthResult(result);
 };
 
 export const openKakaoLogin = async () => {
-  const res = await fetch(`${BASE_URL}/user/auth/kakao`);
+  const res = await fetch(`${BASE_URL}/user/auth/kakao?platform=${PLATFORM}`);
   const data = await res.json();
-  const result = await WebBrowser.openAuthSessionAsync(data.url, 'travelplanner://auth/callback');
-  if (result.type !== 'success') return null;
-  const params = Object.fromEntries(
-    (result.url.split('?')[1] ?? '').split('&').map(p => p.split('=').map(decodeURIComponent))
-  );
-  if (!params.access_token) return null;
-  return { access_token: params.access_token, refresh_token: params.refresh_token };
+  const result = await WebBrowser.openAuthSessionAsync(data.url, REDIRECT_URL);
+  return parseOAuthResult(result);
 };

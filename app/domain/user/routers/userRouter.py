@@ -6,6 +6,8 @@ from app.db.database import get_db
 from app.domain.user.schema.userSchema import UserCreate, UserLogin, TokenResponse, UserUpdate, RefreshTokenRequest
 from app.domain.user.services.userService import create_user, login_user, select_user, logout_user, is_email_taken, update_user
 from app.domain.user.services.oauthService import get_naver_login_url, auth_naver_login, get_kakao_login_url, auth_kakao_login
+from app.core.config import WEB_CALLBACK_URL
+from fastapi import Query
 from app.dependencies.auth import verify_refresh_token
 from app.core.security import create_access_token, create_refresh_token
 from app.db.redis import set_refresh_token
@@ -31,30 +33,32 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
     return login_user(db, user_data)
 
 @router.get("/auth/naver")
-def naver_login():
-    logger.info("네이버 로그인 요청")
-    return {"url": get_naver_login_url()}
+def naver_login(platform: str = Query(default="native")):
+    logger.info(f"네이버 로그인 요청 - platform: {platform}")
+    return {"url": get_naver_login_url(platform)}
 
 @router.get("/auth/naver/callback")
 def naver_callback(code: str, state: str, db: Session = Depends(get_db)):
     logger.info(f"네이버 콜백 - code: {code}, state: {state}")
+    platform = state.split(":")[0] if ":" in state else "native"
     result = auth_naver_login(db, code)
-    return RedirectResponse(
-        url=f"travelplanner://auth/callback?access_token={result.access_token}&refresh_token={result.refresh_token}"
-    )
+    tokens = f"access_token={result.access_token}&refresh_token={result.refresh_token}"
+    redirect_url = f"{WEB_CALLBACK_URL}?{tokens}" if platform == "web" else f"travelplanner://auth/callback?{tokens}"
+    return RedirectResponse(url=redirect_url)
 
 @router.get("/auth/kakao")
-def kakao_login():
-    logger.info("카카오 로그인 요청")
-    return {"url": get_kakao_login_url()}
+def kakao_login(platform: str = Query(default="native")):
+    logger.info(f"카카오 로그인 요청 - platform: {platform}")
+    return {"url": get_kakao_login_url(platform)}
 
 @router.get("/auth/kakao/callback")
-def kakao_callback(code: str, db: Session = Depends(get_db)):
+def kakao_callback(code: str, state: str = "", db: Session = Depends(get_db)):
     logger.info(f"카카오 콜백 - code: {code}")
+    platform = state.split(":")[0] if ":" in state else "native"
     result = auth_kakao_login(db, code)
-    return RedirectResponse(
-        url=f"travelplanner://auth/callback?access_token={result.access_token}&refresh_token={result.refresh_token}"
-    )
+    tokens = f"access_token={result.access_token}&refresh_token={result.refresh_token}"
+    redirect_url = f"{WEB_CALLBACK_URL}?{tokens}" if platform == "web" else f"travelplanner://auth/callback?{tokens}"
+    return RedirectResponse(url=redirect_url)
 
 @router.get("/me")
 def select(request: Request, db: Session = Depends(get_db)):

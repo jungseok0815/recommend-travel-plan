@@ -13,6 +13,7 @@ from app.domain.user.models.userModel import User
 from app.domain.user.models.socialAccountModel import SocialAccount
 from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule, TripReview, TripParticipant
 from app.domain.preference.models.preferenceModel import Preference
+from app.domain.preference.models.userEmbeddingModel import UserEmbedding
 from app.scheduler.collector import start_scheduler
 
 @asynccontextmanager
@@ -104,8 +105,10 @@ async def auth_middleware(request: Request, call_next):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "http://localhost:8080",
         "http://localhost:8081",
         "http://localhost:19006",
+        "http://127.0.0.1:8080",
         "http://127.0.0.1:8081",
         "http://127.0.0.1:19006",
     ],
