@@ -17,23 +17,23 @@ const PRIORITY_OPTIONS = [
 // ── 중항목 ────────────────────────────────────────────────────
 const SUB_OPTIONS = {
   A01: [
-    { value: 'A01010500', label: '해수욕장/해변', icon: 'water-outline',        description: '바다, 해변 여행' },
-    { value: 'A01010100', label: '산/트레킹',     icon: 'trail-sign-outline',   description: '등산, 트레킹' },
-    { value: 'A01010800', label: '계곡',           icon: 'partly-sunny-outline', description: '계곡, 래프팅' },
-    { value: 'A01011500', label: '온천/스파',      icon: 'thermometer-outline',  description: '온천, 스파 힐링' },
-    { value: 'A01011200', label: '공원/수목원',    icon: 'flower-outline',       description: '공원, 식물원 산책' },
+    { value: 'beach',    label: '해수욕장/해변', icon: 'water-outline',        description: '바다, 해변 여행' },
+    { value: 'mountain', label: '산/트레킹',     icon: 'trail-sign-outline',   description: '등산, 트레킹' },
+    { value: 'valley',   label: '계곡',           icon: 'partly-sunny-outline', description: '계곡, 래프팅' },
+    { value: 'hotspring', label: '온천/스파',     icon: 'thermometer-outline',  description: '온천, 스파 힐링' },
+    { value: 'park',     label: '공원/수목원',    icon: 'flower-outline',       description: '공원, 식물원 산책' },
   ],
   A02: [
-    { value: 'A0201', label: '역사/유적',       icon: 'business-outline',      description: '고궁, 유적지, 사찰' },
-    { value: 'A0203', label: '전통문화 체험',   icon: 'color-palette-outline', description: '전통문화 체험' },
-    { value: 'A0202', label: '테마파크',         icon: 'happy-outline',         description: '테마파크, 휴양지' },
-    { value: 'A0205', label: '전망대/랜드마크', icon: 'eye-outline',           description: '전망대, 조형물' },
+    { value: 'history',   label: '역사/유적',       icon: 'business-outline',      description: '고궁, 유적지, 사찰' },
+    { value: 'culture',   label: '전통문화 체험',   icon: 'color-palette-outline', description: '전통문화 체험' },
+    { value: 'themepark', label: '테마파크',         icon: 'happy-outline',         description: '테마파크, 휴양지' },
+    { value: 'landmark',  label: '전망대/랜드마크', icon: 'eye-outline',           description: '전망대, 조형물' },
   ],
   A03: [
-    { value: 'A0302', label: '육상 레포츠', icon: 'bicycle-outline',  description: '트레킹, 자전거, 승마' },
-    { value: 'A0303', label: '수상 레포츠', icon: 'boat-outline',     description: '서핑, 카약, 래프팅' },
-    { value: 'A0304', label: '항공 레포츠', icon: 'airplane-outline', description: '패러글라이딩, 번지점프' },
-    { value: 'A0305', label: '복합 레포츠', icon: 'flash-outline',    description: '다양한 레포츠 복합' },
+    { value: 'land_sports',  label: '육상 레포츠', icon: 'bicycle-outline',  description: '트레킹, 자전거, 승마' },
+    { value: 'water_sports', label: '수상 레포츠', icon: 'boat-outline',     description: '서핑, 카약, 래프팅' },
+    { value: 'air_sports',   label: '항공 레포츠', icon: 'airplane-outline', description: '패러글라이딩, 번지점프' },
+    { value: 'mixed_sports', label: '복합 레포츠', icon: 'flash-outline',    description: '다양한 레포츠 복합' },
   ],
   A04: [
     { value: 'market',   label: '전통시장',     icon: 'storefront-outline', description: '로컬 전통시장' },
@@ -54,12 +54,12 @@ const FOOD_OPTIONS = [
 ];
 
 const ACCOMMODATION_OPTIONS = [
-  { value: 'B02010100', label: '호텔',         icon: 'business-outline',     description: '편리하고 쾌적한 호텔' },
-  { value: 'B02010900', label: '펜션',         icon: 'home-outline',         description: '아늑하고 독립적인 공간' },
-  { value: 'B02011400', label: '게스트하우스', icon: 'people-outline',       description: '합리적인 가격, 다양한 만남' },
-  { value: 'B02011700', label: '캠핑',         icon: 'bonfire-outline',      description: '자연 속 캠핑 경험' },
-  { value: 'B02011300', label: '한옥',         icon: 'partly-sunny-outline', description: '전통 한옥 숙박 체험' },
-  { value: 'B02011600', label: '리조트',       icon: 'umbrella-outline',     description: '럭셔리한 리조트 휴양' },
+  { value: 'hotel',       label: '호텔',         icon: 'business-outline',     description: '편리하고 쾌적한 호텔' },
+  { value: 'pension',     label: '펜션',         icon: 'home-outline',         description: '아늑하고 독립적인 공간' },
+  { value: 'guesthouse',  label: '게스트하우스', icon: 'people-outline',       description: '합리적인 가격, 다양한 만남' },
+  { value: 'camping',     label: '캠핑',         icon: 'bonfire-outline',      description: '자연 속 캠핑 경험' },
+  { value: 'hanok',       label: '한옥',         icon: 'partly-sunny-outline', description: '전통 한옥 숙박 체험' },
+  { value: 'resort',      label: '리조트',       icon: 'umbrella-outline',     description: '럭셔리한 리조트 휴양' },
 ];
 
 // ── Step 정의 (3 step) ────────────────────────────────────────
