@@ -13,11 +13,14 @@ from app.domain.user.models.userModel import User
 from app.domain.user.models.socialAccountModel import SocialAccount
 from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule, TripReview, TripParticipant
 from app.domain.preference.models.preferenceModel import Preference
+from app.scheduler.collector import start_scheduler
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     Base.metadata.create_all(bind=engine)
+    scheduler = start_scheduler()
     yield
+    scheduler.shutdown()
 
 app = FastAPI(lifespan=lifespan)
 
