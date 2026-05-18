@@ -27,7 +27,8 @@ KAKAO_REDIRECT_URI = os.getenv("KAKAO_REDIRECT_URI", "")
 """
 한국관광공사 관광지 api
 """
-TOUR_API_KEY = os.getenv("TOUR_API_KEY", "")
+TOUR_API_KEY    = os.getenv("TOUR_API_KEY", "")
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY", "")
 
 """
 카카오api
