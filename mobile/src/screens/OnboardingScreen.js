@@ -21,13 +21,13 @@ const SUB_OPTIONS = {
     { value: 'A01010100', label: '산/트레킹',     icon: 'trail-sign-outline',   description: '등산, 트레킹' },
     { value: 'A01010800', label: '계곡',           icon: 'partly-sunny-outline', description: '계곡, 래프팅' },
     { value: 'A01011500', label: '온천/스파',      icon: 'thermometer-outline',  description: '온천, 스파 힐링' },
-    { value: 'A01011200', label: '공원/수목원',    icon: 'leaf-outline',         description: '공원, 식물원 산책' },
+    { value: 'A01011200', label: '공원/수목원',    icon: 'flower-outline',       description: '공원, 식물원 산책' },
   ],
   A02: [
-    { value: 'A0201', label: '역사/유적',     icon: 'business-outline',      description: '고궁, 유적지, 사찰' },
-    { value: 'A0203', label: '전통문화 체험', icon: 'color-palette-outline', description: '전통문화 체험' },
-    { value: 'A0202', label: '테마파크',      icon: 'happy-outline',         description: '테마파크, 휴양지' },
-    { value: 'A0205', label: '전망대/랜드마크', icon: 'eye-outline',         description: '전망대, 조형물' },
+    { value: 'A0201', label: '역사/유적',       icon: 'business-outline',      description: '고궁, 유적지, 사찰' },
+    { value: 'A0203', label: '전통문화 체험',   icon: 'color-palette-outline', description: '전통문화 체험' },
+    { value: 'A0202', label: '테마파크',         icon: 'happy-outline',         description: '테마파크, 휴양지' },
+    { value: 'A0205', label: '전망대/랜드마크', icon: 'eye-outline',           description: '전망대, 조형물' },
   ],
   A03: [
     { value: 'A0302', label: '육상 레포츠', icon: 'bicycle-outline',  description: '트레킹, 자전거, 승마' },
@@ -36,18 +36,11 @@ const SUB_OPTIONS = {
     { value: 'A0305', label: '복합 레포츠', icon: 'flash-outline',    description: '다양한 레포츠 복합' },
   ],
   A04: [
-    { value: 'market',   label: '전통시장',    icon: 'storefront-outline', description: '로컬 전통시장' },
-    { value: 'mall',     label: '쇼핑몰/백화점', icon: 'bag-outline',       description: '백화점, 쇼핑몰' },
-    { value: 'outlet',   label: '아울렛',      icon: 'pricetag-outline',   description: '아울렛, 할인매장' },
-    { value: 'dutyfree', label: '면세점',      icon: 'gift-outline',       description: '면세점 쇼핑' },
+    { value: 'market',   label: '전통시장',     icon: 'storefront-outline', description: '로컬 전통시장' },
+    { value: 'mall',     label: '쇼핑몰/백화점', icon: 'bag-outline',        description: '백화점, 쇼핑몰' },
+    { value: 'outlet',   label: '아울렛',       icon: 'pricetag-outline',   description: '아울렛, 할인매장' },
+    { value: 'dutyfree', label: '면세점',       icon: 'gift-outline',       description: '면세점 쇼핑' },
   ],
-};
-
-const SUB_TITLES = {
-  A01: { title: '자연에서\n어떤 곳을 좋아하나요?',   subtitle: '선호하는 순서대로 탭해주세요' },
-  A02: { title: '인문에서\n무엇을 즐기시나요?',       subtitle: '선호하는 순서대로 탭해주세요' },
-  A03: { title: '어떤 레포츠를\n즐기시나요?',         subtitle: '선호하는 순서대로 탭해주세요' },
-  A04: { title: '어떤 쇼핑을\n즐기시나요?',           subtitle: '선호하는 순서대로 탭해주세요' },
 };
 
 // ── 음식 / 숙박 ───────────────────────────────────────────────
@@ -69,25 +62,14 @@ const ACCOMMODATION_OPTIONS = [
   { value: 'B02011600', label: '리조트',       icon: 'umbrella-outline',     description: '럭셔리한 리조트 휴양' },
 ];
 
-// ── Step 정의 ─────────────────────────────────────────────────
-const BASE_STEPS = [
+// ── Step 정의 (3 step) ────────────────────────────────────────
+const STEPS = [
   {
     key:     'travel_priority',
-    type:    'ranking',
+    type:    'priority_with_sub',
     title:   '여행에서 가장\n중요한 것은?',
-    subtitle:'탭하는 순서대로 우선순위가 정해져요\n모든 항목을 순위 매겨주세요',
-    options: PRIORITY_OPTIONS,
-    requireAll: true,   // 모든 항목 순위 매겨야 다음 가능
+    subtitle:'탭하는 순서대로 우선순위를 정하고\n세부 항목을 선택해요',
   },
-  ...['A01', 'A02', 'A03', 'A04'].map(cat => ({
-    key:        `sub_${cat}`,
-    type:       'ranking',
-    title:      SUB_TITLES[cat].title,
-    subtitle:   SUB_TITLES[cat].subtitle,
-    options:    SUB_OPTIONS[cat],
-    requireAll: false,  // 1개 이상 선택하면 다음 가능
-    parentCat:  cat,
-  })),
   {
     key:     'food_types',
     type:    'multi',
@@ -112,58 +94,71 @@ export default function OnboardingScreen({ navigation, route }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState(() => {
     if (existing) return existing;
-    const init = {};
-    BASE_STEPS.forEach(s => { init[s.key] = []; });
-    return init;
+    return {
+      travel_priority:    [],   // 대항목 순위 배열 ['A01', 'A03', ...]
+      sub_A01:            [],
+      sub_A02:            [],
+      sub_A03:            [],
+      sub_A04:            [],
+      food_types:         [],
+      accommodation_type: [],
+    };
   });
   const [loading, setLoading] = useState(false);
 
-  const step   = BASE_STEPS[currentStep];
-  const isLast = currentStep === BASE_STEPS.length - 1;
+  const step   = STEPS[currentStep];
+  const isLast = currentStep === STEPS.length - 1;
 
-  const getRank = (value) => {
-    const arr = answers[step.key] ?? [];
-    const idx = arr.indexOf(value);
-    return idx === -1 ? null : idx + 1;
+  // 대항목 탭 — 순위 부여 또는 해제
+  const handleMajorSelect = (catValue) => {
+    setAnswers(prev => {
+      const arr = [...prev.travel_priority];
+      const idx = arr.indexOf(catValue);
+      if (idx !== -1) {
+        arr.splice(idx, 1);  // 이미 선택 → 순위 해제
+        return { ...prev, travel_priority: arr, [`sub_${catValue}`]: [] };
+      }
+      return { ...prev, travel_priority: [...arr, catValue] };
+    });
   };
 
-  const handleSelect = (value) => {
-    if (step.type === 'ranking') {
-      setAnswers(prev => {
-        const arr = [...(prev[step.key] ?? [])];
-        const idx = arr.indexOf(value);
-        if (idx !== -1) arr.splice(idx, 1);
-        else arr.push(value);
-        return { ...prev, [step.key]: arr };
-      });
-    } else {
-      setAnswers(prev => {
-        const arr = [...(prev[step.key] ?? [])];
-        const idx = arr.indexOf(value);
-        return {
-          ...prev,
-          [step.key]: idx !== -1 ? arr.filter(v => v !== value) : [...arr, value],
-        };
-      });
-    }
+  // 중항목 탭 — 복수 선택/해제
+  const handleSubSelect = (catValue, subValue) => {
+    setAnswers(prev => {
+      const arr = [...(prev[`sub_${catValue}`] ?? [])];
+      const idx = arr.indexOf(subValue);
+      return {
+        ...prev,
+        [`sub_${catValue}`]: idx !== -1 ? arr.filter(v => v !== subValue) : [...arr, subValue],
+      };
+    });
+  };
+
+  // 일반 복수 선택
+  const handleMultiSelect = (value) => {
+    setAnswers(prev => {
+      const arr = [...(prev[step.key] ?? [])];
+      const idx = arr.indexOf(value);
+      return {
+        ...prev,
+        [step.key]: idx !== -1 ? arr.filter(v => v !== value) : [...arr, value],
+      };
+    });
   };
 
   const hasSelection = () => {
-    const arr = answers[step.key] ?? [];
-    if (step.type === 'ranking') {
-      return step.requireAll
-        ? arr.length === step.options.length
-        : arr.length >= 1;
+    if (step.type === 'priority_with_sub') {
+      const ranked = answers.travel_priority;
+      if (ranked.length !== PRIORITY_OPTIONS.length) return false;
+      // 모든 대항목에 중항목 1개 이상 선택
+      return ranked.every(cat => (answers[`sub_${cat}`] ?? []).length > 0);
     }
-    return arr.length > 0;
+    return (answers[step.key] ?? []).length > 0;
   };
 
   const handleNext = async () => {
     if (!hasSelection()) return;
-    if (!isLast) {
-      setCurrentStep(prev => prev + 1);
-      return;
-    }
+    if (!isLast) { setCurrentStep(prev => prev + 1); return; }
     setLoading(true);
     try {
       const body = {
@@ -175,13 +170,8 @@ export default function OnboardingScreen({ navigation, route }) {
         food_types:         answers.food_types,
         accommodation_type: answers.accommodation_type,
       };
-      if (isEditing) {
-        await updatePreference(body);
-        navigation.goBack();
-      } else {
-        await createPreference(body);
-        navigation.replace('Main');
-      }
+      if (isEditing) { await updatePreference(body); navigation.goBack(); }
+      else           { await createPreference(body); navigation.replace('Main'); }
     } catch (e) {
       Alert.alert('오류', e.message);
     } finally {
@@ -190,25 +180,18 @@ export default function OnboardingScreen({ navigation, route }) {
   };
 
   const handleBack = () => {
-    if (currentStep === 0) {
-      if (isEditing) navigation.goBack();
-      return;
-    }
+    if (currentStep === 0) { if (isEditing) navigation.goBack(); return; }
     setCurrentStep(prev => prev - 1);
   };
 
-  const rankArr = answers[step.key] ?? [];
-
-  const progressLabel = () => {
-    if (step.type !== 'ranking') return null;
-    if (step.requireAll) {
-      return rankArr.length === step.options.length
-        ? '순위가 완성됐어요!'
-        : `${rankArr.length}/${step.options.length} 순위 선택됨`;
-    }
-    return rankArr.length >= 1
-      ? `${rankArr.length}개 선택됨 (더 선택할 수 있어요)`
-      : '1개 이상 선택해주세요';
+  // Step 1 완료 상태 텍스트
+  const priorityGuide = () => {
+    const ranked = answers.travel_priority;
+    if (ranked.length < PRIORITY_OPTIONS.length)
+      return `${ranked.length}/${PRIORITY_OPTIONS.length} 대항목 선택됨`;
+    const missingSubCount = ranked.filter(cat => (answers[`sub_${cat}`] ?? []).length === 0).length;
+    if (missingSubCount > 0) return `세부 항목을 선택해주세요 (${missingSubCount}개 남음)`;
+    return '모든 선택 완료!';
   };
 
   return (
@@ -222,42 +205,32 @@ export default function OnboardingScreen({ navigation, route }) {
             <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
               <Ionicons name="chevron-back" size={24} color="#111827" />
             </TouchableOpacity>
-          ) : (
-            <View style={styles.backBtnPlaceholder} />
-          )}
+          ) : <View style={styles.backBtnPlaceholder} />}
         </View>
         <View style={styles.progressWrap}>
-          {BASE_STEPS.map((_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.progressBar,
-                i < currentStep   && styles.progressBarDone,
-                i === currentStep && styles.progressBarActive,
-              ]}
-            />
+          {STEPS.map((_, i) => (
+            <View key={i} style={[
+              styles.progressBar,
+              i < currentStep   && styles.progressBarDone,
+              i === currentStep && styles.progressBarActive,
+            ]} />
           ))}
         </View>
-        <Text style={styles.stepCounter}>{currentStep + 1}/{BASE_STEPS.length}</Text>
+        <Text style={styles.stepCounter}>{currentStep + 1}/{STEPS.length}</Text>
       </View>
 
-      <ScrollView
-        style={styles.body}
-        contentContainerStyle={styles.bodyContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} showsVerticalScrollIndicator={false}>
+
         {/* 질문 */}
         <View style={styles.questionSection}>
           <View style={styles.stepBadgeRow}>
             <View style={styles.stepBadge}>
               <Text style={styles.stepBadgeText}>STEP {currentStep + 1}</Text>
             </View>
-            {step.type === 'ranking' ? (
+            {step.type === 'priority_with_sub' ? (
               <View style={styles.rankingBadge}>
                 <Ionicons name="trophy-outline" size={12} color="#D97706" />
-                <Text style={styles.rankingBadgeText}>
-                  {step.requireAll ? '전체 순위 선택' : '선호 순위 선택'}
-                </Text>
+                <Text style={styles.rankingBadgeText}>우선순위 + 세부 선택</Text>
               </View>
             ) : (
               <View style={styles.multiSelectBadge}>
@@ -266,80 +239,129 @@ export default function OnboardingScreen({ navigation, route }) {
               </View>
             )}
           </View>
-
-          {/* 중항목 step이면 대항목 표시 */}
-          {step.parentCat && (
-            <View style={styles.parentCatBadge}>
-              <Text style={styles.parentCatText}>
-                {PRIORITY_OPTIONS.find(o => o.value === step.parentCat)?.label} 세부 선택
-              </Text>
-            </View>
-          )}
-
           <Text style={styles.questionTitle}>{step.title}</Text>
           <Text style={styles.questionSubtitle}>{step.subtitle}</Text>
         </View>
 
-        {/* 옵션 카드 */}
-        <View style={styles.optionsWrap}>
-          {step.options.map((opt) => {
-            const rank     = step.type === 'ranking' ? getRank(opt.value) : null;
-            const selected = step.type === 'ranking'
-              ? rank !== null
-              : (answers[step.key] ?? []).includes(opt.value);
+        {/* Step 1 — 대항목 + 중항목 아코디언 */}
+        {step.type === 'priority_with_sub' && (
+          <View style={styles.optionsWrap}>
+            {PRIORITY_OPTIONS.map(opt => {
+              const rank    = answers.travel_priority.indexOf(opt.value);
+              const isRanked = rank !== -1;
+              const subSelected = answers[`sub_${opt.value}`] ?? [];
 
-            return (
-              <TouchableOpacity
-                key={opt.value}
-                style={[styles.optionCard, selected && styles.optionCardSelected]}
-                onPress={() => handleSelect(opt.value)}
-                activeOpacity={0.75}
-              >
-                <View style={[styles.optionIconWrap, selected && styles.optionIconWrapSelected]}>
-                  <Ionicons name={opt.icon} size={22} color={selected ? '#FFFFFF' : '#6B7280'} />
+              return (
+                <View key={opt.value}>
+                  {/* 대항목 카드 */}
+                  <TouchableOpacity
+                    style={[styles.optionCard, isRanked && styles.optionCardSelected]}
+                    onPress={() => handleMajorSelect(opt.value)}
+                    activeOpacity={0.75}
+                  >
+                    <View style={[styles.optionIconWrap, isRanked && styles.optionIconWrapSelected]}>
+                      <Ionicons name={opt.icon} size={22} color={isRanked ? '#FFFFFF' : '#6B7280'} />
+                    </View>
+                    <View style={styles.optionTextWrap}>
+                      <Text style={[styles.optionLabel, isRanked && styles.optionLabelSelected]}>
+                        {opt.label}
+                      </Text>
+                      <Text style={[styles.optionDesc, isRanked && styles.optionDescSelected]}>
+                        {opt.description}
+                      </Text>
+                    </View>
+                    <View style={[styles.rankBadge, isRanked && styles.rankBadgeSelected]}>
+                      {isRanked
+                        ? <Text style={styles.rankBadgeText}>{rank + 1}</Text>
+                        : <Text style={styles.rankBadgePlaceholder}>-</Text>
+                      }
+                    </View>
+                  </TouchableOpacity>
+
+                  {/* 중항목 — 대항목 선택 시 펼쳐짐 */}
+                  {isRanked && (
+                    <View style={styles.subOptionsWrap}>
+                      <Text style={styles.subLabel}>세부 선택 (복수 가능)</Text>
+                      <View style={styles.subGrid}>
+                        {SUB_OPTIONS[opt.value].map(sub => {
+                          const subChecked = subSelected.includes(sub.value);
+                          return (
+                            <TouchableOpacity
+                              key={sub.value}
+                              style={[styles.subCard, subChecked && styles.subCardSelected]}
+                              onPress={() => handleSubSelect(opt.value, sub.value)}
+                              activeOpacity={0.75}
+                            >
+                              <View style={styles.subCardTop}>
+                                <Ionicons
+                                  name={sub.icon}
+                                  size={18}
+                                  color={subChecked ? '#111827' : '#9CA3AF'}
+                                />
+                                <View style={[styles.subCheck, subChecked && styles.subCheckSelected]}>
+                                  {subChecked && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}
+                                </View>
+                              </View>
+                              <Text style={[styles.subCardLabel, subChecked && styles.subCardLabelSelected]}>
+                                {sub.label}
+                              </Text>
+                              <Text style={styles.subCardDesc}>{sub.description}</Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  )}
                 </View>
-                <View style={styles.optionTextWrap}>
-                  <Text style={[styles.optionLabel, selected && styles.optionLabelSelected]}>
+              );
+            })}
+          </View>
+        )}
+
+        {/* Step 2, 3 — 2열 그리드 복수 선택 */}
+        {step.type === 'multi' && (
+          <View style={styles.multiGrid}>
+            {step.options.map(opt => {
+              const selected = (answers[step.key] ?? []).includes(opt.value);
+              return (
+                <TouchableOpacity
+                  key={opt.value}
+                  style={[styles.multiCard, selected && styles.multiCardSelected]}
+                  onPress={() => handleMultiSelect(opt.value)}
+                  activeOpacity={0.75}
+                >
+                  <View style={styles.multiCardTop}>
+                    <View style={[styles.multiIconWrap, selected && styles.multiIconWrapSelected]}>
+                      <Ionicons name={opt.icon} size={20} color={selected ? '#FFFFFF' : '#6B7280'} />
+                    </View>
+                    <View style={[styles.multiCheck, selected && styles.multiCheckSelected]}>
+                      {selected && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}
+                    </View>
+                  </View>
+                  <Text style={[styles.multiCardLabel, selected && styles.multiCardLabelSelected]}>
                     {opt.label}
                   </Text>
-                  <Text style={[styles.optionDesc, selected && styles.optionDescSelected]}>
-                    {opt.description}
-                  </Text>
-                </View>
-                {step.type === 'ranking' ? (
-                  <View style={[styles.rankBadge, selected && styles.rankBadgeSelected]}>
-                    {rank !== null
-                      ? <Text style={styles.rankBadgeText}>{rank}</Text>
-                      : <Text style={styles.rankBadgePlaceholder}>-</Text>
-                    }
-                  </View>
-                ) : (
-                  <View style={[styles.optionCheck, selected && styles.optionCheckSelected]}>
-                    {selected && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+                  <Text style={styles.multiCardDesc}>{opt.description}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
       </ScrollView>
 
       {/* 하단 버튼 */}
       <View style={styles.footer}>
-        {progressLabel() && (
-          <Text style={styles.guideText}>{progressLabel()}</Text>
-        )}
-        {step.type === 'multi' && rankArr.length > 0 && (
-          <Text style={styles.guideText}>{rankArr.length}개 선택됨</Text>
-        )}
+        <Text style={styles.guideText}>
+          {step.type === 'priority_with_sub'
+            ? priorityGuide()
+            : `${(answers[step.key] ?? []).length}개 선택됨`}
+        </Text>
         <TouchableOpacity
           style={[styles.nextBtn, !hasSelection() && styles.nextBtnDisabled]}
           onPress={handleNext}
           disabled={!hasSelection() || loading}
         >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
+          {loading ? <ActivityIndicator color="#FFFFFF" /> : (
             <View style={styles.nextBtnInner}>
               <Text style={styles.nextBtnText}>
                 {isLast ? (isEditing ? '저장하기' : '시작하기') : '다음'}
@@ -366,17 +388,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center',
   },
   backBtnPlaceholder: { width: 36 },
-  progressWrap: { flex: 1, flexDirection: 'row', gap: 4 },
+  progressWrap: { flex: 1, flexDirection: 'row', gap: 5 },
   progressBar: { flex: 1, height: 4, borderRadius: 2, backgroundColor: '#E5E7EB' },
   progressBarDone:   { backgroundColor: '#9CA3AF' },
   progressBarActive: { backgroundColor: '#111827' },
   stepCounter: { fontSize: 12, color: '#9CA3AF', fontWeight: '600', width: 28, textAlign: 'right' },
 
   body: { flex: 1 },
-  bodyContent: { paddingHorizontal: 20, paddingBottom: 16 },
+  bodyContent: { paddingHorizontal: 20, paddingBottom: 24 },
 
-  questionSection: { paddingTop: 24, paddingBottom: 24 },
-  stepBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+  questionSection: { paddingTop: 24, paddingBottom: 20 },
+  stepBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
   stepBadge: {
     backgroundColor: '#F3F4F6', borderRadius: 8,
     paddingHorizontal: 10, paddingVertical: 4,
@@ -394,21 +416,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, paddingVertical: 4,
   },
   multiSelectBadgeText: { fontSize: 11, fontWeight: '600', color: '#2563EB' },
-
-  parentCatBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#F0FDF4', borderRadius: 8,
-    paddingHorizontal: 10, paddingVertical: 4,
-    marginBottom: 10,
-  },
-  parentCatText: { fontSize: 12, fontWeight: '600', color: '#16A34A' },
-
   questionTitle: {
     fontSize: 26, fontWeight: '700', color: '#111827',
     lineHeight: 34, letterSpacing: -0.5, marginBottom: 8,
   },
   questionSubtitle: { fontSize: 14, color: '#9CA3AF', lineHeight: 20 },
 
+  // 대항목 카드
   optionsWrap: { gap: 10 },
   optionCard: {
     flexDirection: 'row', alignItems: 'center',
@@ -429,7 +443,6 @@ const styles = StyleSheet.create({
   optionLabelSelected: { color: '#111827' },
   optionDesc: { fontSize: 12, color: '#9CA3AF' },
   optionDescSelected: { color: '#6B7280' },
-
   rankBadge: {
     width: 32, height: 32, borderRadius: 16,
     borderWidth: 2, borderColor: '#E5E7EB',
@@ -440,12 +453,77 @@ const styles = StyleSheet.create({
   rankBadgeText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
   rankBadgePlaceholder: { fontSize: 14, fontWeight: '700', color: '#D1D5DB' },
 
+  // 중항목
+  subOptionsWrap: {
+    marginTop: 4, marginBottom: 6,
+    marginLeft: 16,
+    borderLeftWidth: 2, borderLeftColor: '#E5E7EB',
+    paddingLeft: 12,
+  },
+  subLabel: { fontSize: 11, fontWeight: '600', color: '#9CA3AF', marginBottom: 6 },
+  subGrid: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 8,
+  },
+  subCard: {
+    width: '47%',
+    padding: 12, borderRadius: 12,
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1.5, borderColor: 'transparent',
+  },
+  subCardSelected: { backgroundColor: '#F0F9FF', borderColor: '#111827' },
+  subCardTop: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', marginBottom: 6,
+  },
+  subCardLabel: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 2 },
+  subCardLabelSelected: { color: '#111827' },
+  subCardDesc: { fontSize: 11, color: '#9CA3AF', lineHeight: 15 },
+  subCheck: {
+    width: 16, height: 16, borderRadius: 8,
+    borderWidth: 1.5, borderColor: '#D1D5DB',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  subCheckSelected: { backgroundColor: '#111827', borderColor: '#111827' },
+
+  // 복수 선택 체크 (대항목용)
   optionCheck: {
     width: 22, height: 22, borderRadius: 11,
     borderWidth: 2, borderColor: '#E5E7EB',
     alignItems: 'center', justifyContent: 'center',
   },
   optionCheckSelected: { backgroundColor: '#111827', borderColor: '#111827' },
+
+  // multi 2열 그리드 (음식/숙박)
+  multiGrid: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 10,
+  },
+  multiCard: {
+    width: '47%',
+    padding: 14, borderRadius: 16,
+    backgroundColor: '#F9FAFB',
+    borderWidth: 2, borderColor: 'transparent',
+  },
+  multiCardSelected: { backgroundColor: '#FAFAFA', borderColor: '#111827' },
+  multiCardTop: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', marginBottom: 10,
+  },
+  multiIconWrap: {
+    width: 40, height: 40, borderRadius: 12,
+    backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06, shadowRadius: 3, elevation: 1,
+  },
+  multiIconWrapSelected: { backgroundColor: '#111827' },
+  multiCheck: {
+    width: 18, height: 18, borderRadius: 9,
+    borderWidth: 1.5, borderColor: '#D1D5DB',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  multiCheckSelected: { backgroundColor: '#111827', borderColor: '#111827' },
+  multiCardLabel: { fontSize: 14, fontWeight: '700', color: '#374151', marginBottom: 3 },
+  multiCardLabelSelected: { color: '#111827' },
+  multiCardDesc: { fontSize: 11, color: '#9CA3AF', lineHeight: 15 },
 
   footer: {
     paddingHorizontal: 20, paddingTop: 12, paddingBottom: 32,

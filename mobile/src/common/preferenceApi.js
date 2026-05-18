@@ -1,11 +1,4 @@
-import { BASE_URL, request } from './http';
-
-export const fetchPreferenceOptions = async () => {
-  const res = await fetch(`${BASE_URL}/preference/options`);
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.detail || '선택지를 불러올 수 없습니다');
-  return data;
-};
+import { request } from './http';
 
 export const getPreference = async () => {
   console.log("start getPerference")
