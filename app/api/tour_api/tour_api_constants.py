@@ -2,12 +2,12 @@ BASE_URL = "https://apis.data.go.kr/B551011/KorService2"
 
 
 class Endpoint:
-    AREA_BASED_LIST = "areaBasedList2"  # 지역 기반 관광정보 목록 조회
-    SEARCH_KEYWORD  = "searchKeyword2"  # 키워드로 관광정보 검색
-    DETAIL_COMMON   = "detailCommon2"   # 관광지 상세 공통정보 조회 (주소, 이미지, 좌표 등)
-    DETAIL_INTRO    = "detailIntro2"    # 콘텐츠 타입별 소개정보 조회 (운영시간, 입장료, 휴무일 등)
-    DETAIL_IMAGE    = "detailImage2"    # 관광지 이미지 목록 조회
-    AREA_CODE       = "areaCode2"       # 지역코드 목록 조회
+    AREA_BASED_LIST = "areaBasedList2"
+    SEARCH_KEYWORD  = "searchKeyword2"
+    DETAIL_COMMON   = "detailCommon2"
+    DETAIL_INTRO    = "detailIntro2"
+    DETAIL_IMAGE    = "detailImage2"
+    AREA_CODE       = "areaCode2"
 
 
 class ContentType:

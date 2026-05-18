@@ -3,8 +3,8 @@ import pathlib
 import pandas as pd
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from app.domain.trip.planner.external.tour_api.tour_api import get_spots_by_area
-from app.domain.trip.planner.external.tour_api.tour_api_constants import AreaCode
+from app.api.tour_api.tour_api import get_spots_by_area
+from app.api.tour_api.tour_api_constants import AreaCode
 
 logger = logging.getLogger(__name__)
 

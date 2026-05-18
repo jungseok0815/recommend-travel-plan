@@ -1,7 +1,7 @@
 import logging
 import httpx
 from app.core.config import TOUR_API_KEY
-from app.domain.trip.planner.external.traffic_api.flight_api_constants import BASE_URL, SCHEDULE_ENDPOINT, AirportCode
+from app.api.traffic_api.flight_api_constants import BASE_URL, SCHEDULE_ENDPOINT, AirportCode
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,6 @@ def _get(params: dict) -> dict:
 
 def get_flight_schedules(dep_airport_name: str, arr_airport_name: str, date: str) -> list[dict]:
     """
-    출발/도착 공항명으로 국내선 항공 스케줄 조회
     date 형식: YYYYMMDD (예: 20250501)
     """
     dep_code = getattr(AirportCode, dep_airport_name, None)
@@ -27,12 +26,10 @@ def get_flight_schedules(dep_airport_name: str, arr_airport_name: str, date: str
         return []
 
     data = _get({"page": 1, "perPage": 100})
-
     items = data.get("data", [])
     if not items:
         return []
 
-    # API가 전체 스케줄을 반환하므로 출발/도착/날짜로 필터링
     return [
         item for item in items
         if item.get("출발공항코드") == dep_code

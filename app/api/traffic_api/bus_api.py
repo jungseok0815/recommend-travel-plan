@@ -1,7 +1,7 @@
 import logging
 import httpx
 from app.core.config import TOUR_API_KEY
-from app.domain.trip.planner.external.traffic_api.bus_api_constants import BASE_URL, SCHEDULE_PATH, TerminalId
+from app.api.traffic_api.bus_api_constants import BASE_URL, SCHEDULE_PATH, TerminalId
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,6 @@ def _get(path: str, params: dict) -> dict:
 
 def get_bus_routes(dep_terminal_name: str, arr_terminal_name: str, date: str) -> list[dict]:
     """
-    출발/도착 터미널명으로 고속버스 스케줄 조회
     date 형식: YYYYMMDD (예: 20250501)
     """
     dep_id = getattr(TerminalId, dep_terminal_name, None)
@@ -38,7 +37,6 @@ def get_bus_routes(dep_terminal_name: str, arr_terminal_name: str, date: str) ->
         "numOfRows":     20,
         "pageNo":        1,
     })
-
     items = data.get("response", {}).get("body", {}).get("items", {})
     if not items:
         return []
