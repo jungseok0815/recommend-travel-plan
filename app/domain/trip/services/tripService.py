@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule, TripReview, TripParticipant
 from app.domain.trip.schema.tripSchema import TripCreate, TripResponse, TripReviewCreate, ParticipantResponse, TripScheduleUpdate
 from app.domain.user.models.userModel import User
+from app.domain.trip.planner.pipeline.travel_planner import plan_travel
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,10 @@ def _is_accessible(db: Session, trip: Trip, user_id: int) -> bool:
 
 def create_trip(db: Session, user_id: int, trip_data: TripCreate) -> TripResponse:
     logger.info(f"여행 일정 생성 - user_id: {user_id}, destination: {trip_data.destination}")
+
+    user = db.query(User).filter(User.id == user_id).first()
+    address = user.address or trip_data.destination
+
     trip = Trip(
         user_id        = user_id,
         destination    = trip_data.destination,
@@ -43,9 +48,57 @@ def create_trip(db: Session, user_id: int, trip_data: TripCreate) -> TripRespons
         if not already:
             db.add(TripParticipant(trip_id=trip.id, user_id=target.id))
 
+    try:
+        ai_result = plan_travel(
+            area_name      = trip_data.destination,
+            startDate      = trip_data.start_datetime,
+            endDate        = trip_data.end_datetime,
+            address        = address,
+            transport_mode = trip_data.transport,
+        )
+        _save_ai_schedule(db, trip, ai_result, trip_data.budget)
+    except Exception as e:
+        logger.warning(f"AI 일정 생성 실패, 빈 일정으로 저장 - {e}")
+
     db.commit()
     db.refresh(trip)
     return trip
+
+
+def _save_ai_schedule(db: Session, trip: Trip, ai_result: dict, budget: int):
+    days_data = ai_result.get("days", [])
+    total_cost = 0
+
+    for day_info in days_data:
+        schedules_data = day_info.get("schedules", [])
+        day_cost = sum(int(s.get("cost", 0)) for s in schedules_data)
+        total_cost += day_cost
+
+        trip_day = TripDay(
+            trip_id  = trip.id,
+            day      = int(day_info.get("day", 1)),
+            date     = str(day_info.get("date", "")),
+            day_cost = day_cost,
+        )
+        db.add(trip_day)
+        db.flush()
+
+        remaining = budget - total_cost
+        for s in schedules_data:
+            db.add(TripSchedule(
+                trip_day_id      = trip_day.id,
+                time             = str(s.get("time", "")),
+                activity         = str(s.get("activity", "")),
+                location         = str(s.get("location", "")),
+                transport        = s.get("transport"),
+                duration         = s.get("duration"),
+                cost             = int(s.get("cost", 0)),
+                remaining_budget = remaining,
+                note             = s.get("note"),
+            ))
+
+    trip.total_cost       = total_cost
+    trip.remaining_budget = budget - total_cost
 
 
 def get_trip_list(db: Session, user_id: int) -> list[TripResponse]:

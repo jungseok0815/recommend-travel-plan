@@ -4,11 +4,11 @@ import {
   StyleSheet, Alert, ActivityIndicator, SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { createTrip } from '../../../common/tripApi';
 
 const TRANSPORT_OPTIONS = ['자동차', '대중교통', '기타'];
 
 export default function CreateTripScreen({ navigation }) {
-  const [departure, setDeparture]           = useState('');
   const [destination, setDestination]       = useState('');
   const [startDate, setStartDate]           = useState('');
   const [endDate, setEndDate]               = useState('');
@@ -35,19 +35,27 @@ export default function CreateTripScreen({ navigation }) {
   };
 
   const handleGenerate = async () => {
-    if (!departure || !destination || !startDate || !endDate || !budget) {
-      Alert.alert('알림', '출발지, 여행지, 날짜, 예산을 모두 입력해주세요');
+    if (!destination || !startDate || !endDate || !budget) {
+      Alert.alert('알림', '여행지, 날짜, 예산을 모두 입력해주세요');
       return;
     }
     setLoading(true);
-    // TODO: 백엔드 AI 플랜 생성 API 연동
-    // payload: { departure, destination, start_datetime: startDate, end_datetime: endDate,
-    //            transport, group_size: people, budget: Number(budget),
-    //            participant_emails: participants }
-    setTimeout(() => {
+    try {
+      const trip = await createTrip({
+        destination,
+        start_datetime: startDate,
+        end_datetime: endDate,
+        transport,
+        group_size: people,
+        budget: Number(budget),
+        participant_emails: participants,
+      });
+      navigation.replace('MyPlanDetail', { trip });
+    } catch (e) {
+      Alert.alert('오류', e.message);
+    } finally {
       setLoading(false);
-      Alert.alert('준비 중', 'AI 여행 계획 생성 기능은 백엔드 연동 후 사용 가능합니다');
-    }, 1000);
+    }
   };
 
   return (
@@ -62,21 +70,6 @@ export default function CreateTripScreen({ navigation }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-
-        {/* 출발지 */}
-        <View style={styles.field}>
-          <Text style={styles.label}>출발지</Text>
-          <View style={styles.inputRow}>
-            <Ionicons name="radio-button-on-outline" size={18} color="#9CA3AF" />
-            <TextInput
-              style={styles.input}
-              placeholder="출발지를 입력하세요"
-              placeholderTextColor="#9CA3AF"
-              value={departure}
-              onChangeText={setDeparture}
-            />
-          </View>
-        </View>
 
         {/* 여행지 */}
         <View style={styles.field}>

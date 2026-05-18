@@ -1,5 +1,16 @@
 import { request } from './http';
 
+export const createTrip = async (tripData) => {
+  console.log("tripdata : ", tripData)
+  const res = await request('/trip', {
+    method: 'POST',
+    body: JSON.stringify(tripData),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || '여행 일정 생성에 실패했습니다');
+  return data;
+};
+
 export const getTripList = async () => {
   const res = await request('/trip');
   const data = await res.json();
