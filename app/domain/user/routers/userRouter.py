@@ -2,15 +2,15 @@ import logging
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from app.db.database import get_db
+from app.common.db.database import get_db
 from app.domain.user.schema.userSchema import UserCreate, UserLogin, TokenResponse, UserUpdate, RefreshTokenRequest
 from app.domain.user.services.userService import create_user, login_user, select_user, logout_user, is_email_taken, update_user
 from app.domain.user.services.oauthService import get_naver_login_url, auth_naver_login, get_kakao_login_url, auth_kakao_login
-from app.core.config import WEB_CALLBACK_URL
+from app.common.core.config import WEB_CALLBACK_URL
 from fastapi import Query
-from app.dependencies.auth import verify_refresh_token
-from app.core.security import create_access_token, create_refresh_token
-from app.db.redis import set_refresh_token
+from app.common.dependencies.auth import verify_refresh_token
+from app.common.core.security import create_access_token, create_refresh_token
+from app.common.db.redis import set_refresh_token
 from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)

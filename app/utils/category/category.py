@@ -1,7 +1,12 @@
-from app.utils.embedding import CAT_LABEL
+import json
+import pathlib
+
+_CAT_LABEL_PATH = pathlib.Path(__file__).parent.parent.parent / "resources" / "cat_label.json"
+_cat_label_data = json.loads(_CAT_LABEL_PATH.read_text(encoding="utf-8"))
+CAT_LABEL: dict[str, str] = {k: v for group in _cat_label_data.values() for k, v in group.items()}
 
 
-def _codes_to_labels(csv: str) -> list[str]:
+def codes_to_labels(csv: str) -> list[str]:
     return [CAT_LABEL.get(c.strip(), c.strip()) for c in (csv or "").split(",") if c.strip()]
 
 
@@ -14,8 +19,8 @@ def travel_preference_to_text(preference) -> str:
 
 
 def food_preference_to_text(preference) -> str:
-    return " ".join(_codes_to_labels(preference.food_types or ""))
+    return " ".join(codes_to_labels(preference.food_types or ""))
 
 
 def accommodation_preference_to_text(preference) -> str:
-    return " ".join(_codes_to_labels(preference.accommodation_type or ""))
+    return " ".join(codes_to_labels(preference.accommodation_type or ""))

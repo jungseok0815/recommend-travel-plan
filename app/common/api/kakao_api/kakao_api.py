@@ -1,5 +1,5 @@
 import httpx
-from app.core.config import KAKAO_MOBILITY_API_KEY
+from app.common.core.config import KAKAO_MOBILITY_API_KEY
 
 HEADERS = {"Authorization": f"KakaoAK {KAKAO_MOBILITY_API_KEY}"}
 

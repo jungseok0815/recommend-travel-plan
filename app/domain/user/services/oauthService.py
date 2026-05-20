@@ -3,12 +3,12 @@ import secrets
 import httpx
 from urllib.parse import urlencode
 from sqlalchemy.orm import Session
-from app.core.config import (
+from app.common.core.config import (
     NAVER_CLIENT_ID, NAVER_CLIENT_SECRET, NAVER_REDIRECT_URI,
     KAKAO_CLIENT_ID, KAKAO_REDIRECT_URI,
 )
-from app.core.security import create_access_token, create_refresh_token
-from app.db.redis import set_refresh_token
+from app.common.core.security import create_access_token, create_refresh_token
+from app.common.db.redis import set_refresh_token
 from app.domain.user.schema.userSchema import TokenResponse
 from app.domain.user.services.userService import get_or_create_social_user
 

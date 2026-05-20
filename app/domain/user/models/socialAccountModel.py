@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from app.db.database import Base
+from app.common.db.database import Base
 
 class SocialAccount(Base):
     __tablename__ = "SOCIAL_ACCOUNTS"

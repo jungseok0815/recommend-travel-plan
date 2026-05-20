@@ -1,7 +1,7 @@
 import logging
 import httpx
 from datetime import datetime
-from app.core.config import WEATHER_API_KEY
+from app.common.core.config import WEATHER_API_KEY
 
 logger = logging.getLogger(__name__)
 

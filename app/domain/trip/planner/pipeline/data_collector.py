@@ -1,7 +1,7 @@
 import logging
 import pathlib
 import pandas as pd
-from app.api.tour_api.tour_api import get_spots_by_area
+from app.common.api.tour_api.tour_api import get_spots_by_area
 
 logger = logging.getLogger(__name__)
 

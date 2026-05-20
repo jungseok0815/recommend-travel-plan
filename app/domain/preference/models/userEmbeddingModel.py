@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, ForeignKey, Text
-from app.db.database import Base
+from app.common.db.database import Base
 
 
 class UserEmbedding(Base):

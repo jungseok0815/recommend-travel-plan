@@ -1,6 +1,6 @@
 import json
 import anthropic
-from app.core.config import ANTHROPIC_API_KEY
+from app.common.core.config import ANTHROPIC_API_KEY
 from app.domain.trip.planner.agent.tools import TRAVEL_TOOLS
 from app.domain.trip.planner.agent.tool_executor import execute_tool
 

@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from app.db.database import Base
+from app.common.db.database import Base
 
 class Preference(Base):
     __tablename__ = "PREFERENCES"

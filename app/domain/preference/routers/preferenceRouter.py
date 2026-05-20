@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, Depends, Request, HTTPException
 from sqlalchemy.orm import Session
-from app.db.database import get_db
+from app.common.db.database import get_db
 from app.domain.preference.schema.preferenceSchema import PreferenceCreate, PreferenceResponse
 from app.domain.preference.services.preferenceService import create_preference, get_preference, update_preference, get_preference_or_none
 

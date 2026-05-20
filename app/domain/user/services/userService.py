@@ -5,8 +5,8 @@ from app.domain.user.models.userModel import User
 from app.domain.user.models.socialAccountModel import SocialAccount
 from app.domain.user.schema.userSchema import UserCreate, UserLogin, UserResponse, TokenResponse, UserUpdate
 from app.utils.hash import hash_password, verify_password
-from app.core.security import create_access_token, create_refresh_token
-from app.db.redis import set_refresh_token, delete_refresh_token
+from app.common.core.security import create_access_token, create_refresh_token
+from app.common.db.redis import set_refresh_token, delete_refresh_token
 
 logger = logging.getLogger(__name__)
 

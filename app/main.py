@@ -3,18 +3,18 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.security import decode_token, create_access_token
+from app.common.core.security import decode_token, create_access_token
 from app.domain.user.routers.userRouter import router as user_router
 from app.domain.trip.routers.tripRouter import router as trip_router
 from app.domain.preference.routers.preferenceRouter import router as preference_router
-from app.dependencies.auth import verify_refresh_token
-from app.db.database import Base, engine
+from app.common.dependencies.auth import verify_refresh_token
+from app.common.db.database import Base, engine
 from app.domain.user.models.userModel import User
 from app.domain.user.models.socialAccountModel import SocialAccount
 from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule, TripReview, TripParticipant
 from app.domain.preference.models.preferenceModel import Preference
 from app.domain.preference.models.userEmbeddingModel import UserEmbedding
-from app.scheduler.collector import start_scheduler
+from app.common.scheduler.collector import start_scheduler
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):

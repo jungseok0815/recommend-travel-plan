@@ -1,6 +1,6 @@
 import logging
 import redis
-from app.core.config import REDIS_URL, REFRESH_TOKEN_EXPIRE_MINUTES
+from app.common.core.config import REDIS_URL, REFRESH_TOKEN_EXPIRE_MINUTES
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,9 @@
 import json
 import re
 # import anthropic
-# from app.core.config import ANTHROPIC_API_KEY
+# from app.common.core.config import ANTHROPIC_API_KEY
 from google import genai
-from app.core.config import GEMINI_API_KEY
+from app.common.core.config import GEMINI_API_KEY
 from app.domain.trip.planner.pipeline.data_collector import collect_travel_data
 from app.domain.trip.planner.pipeline.prompt_builder import build_prompt
 from app.domain.preference.services.preferenceFilter import filter_food_spots, filter_accommodations

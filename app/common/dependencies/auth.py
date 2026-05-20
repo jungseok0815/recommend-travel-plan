@@ -2,9 +2,9 @@ import logging
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from app.db.database import get_db
-from app.core.security import decode_token
-from app.db.redis import get_refresh_token
+from app.common.db.database import get_db
+from app.common.core.security import decode_token
+from app.common.db.redis import get_refresh_token
 from app.domain.user.models.userModel import User
 
 logger = logging.getLogger(__name__)

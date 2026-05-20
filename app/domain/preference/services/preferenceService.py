@@ -4,13 +4,12 @@ from fastapi import HTTPException
 from app.domain.preference.models.preferenceModel import Preference
 from app.domain.preference.models.userEmbeddingModel import UserEmbedding
 from app.domain.preference.schema.preferenceSchema import PreferenceCreate, PreferenceResponse
-from app.utils.embedding.embedding import (
+from app.utils.category.category import (
     travel_preference_to_text,
     food_preference_to_text,
     accommodation_preference_to_text,
-    get_embedding,
-    embedding_to_json,
 )
+from app.utils.embedding.embedding import get_embedding, embedding_to_json
 
 logger = logging.getLogger(__name__)
 
