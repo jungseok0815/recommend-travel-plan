@@ -10,12 +10,9 @@ def codes_to_labels(csv: str) -> list[str]:
     return [CAT_LABEL.get(c.strip(), c.strip()) for c in (csv or "").split(",") if c.strip()]
 
 
-def travel_preference_to_text(preference) -> str:
-    parts = []
+def travel_preference_to_dict(preference) -> list[dict]:
     priority = [p.strip() for p in (preference.travel_priority or "").split(",") if p.strip()]
-    for rank, cat in enumerate(priority, 1):
-        parts.append(f"{rank}순위 {CAT_LABEL.get(cat, cat)}")
-    return " ".join(parts)
+    return [{"category": CAT_LABEL.get(cat, cat), "rank": rank} for rank, cat in enumerate(priority, 1)]
 
 
 def food_preference_to_text(preference) -> str:

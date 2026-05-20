@@ -1,43 +1,28 @@
 import logging
-from app.utils.embedding.embedding import json_to_embedding, cosine_similarity
+import numpy as np
+from app.utils.embedding.embedding import json_to_embedding, cosine_similarity, get_embedding
 from app.domain.preference.models.userEmbeddingModel import UserEmbedding
-from app.domain.preference.models.preferenceModel import Preference
 
 logger = logging.getLogger(__name__)
 
 RANK_WEIGHTS = [1.0, 0.7, 0.4, 0.2]
 
 
-def _rank_weight_map(travel_priority: str) -> dict[str, float]:
-    priority = [p.strip() for p in (travel_priority or "").split(",") if p.strip()]
-    return {cat: RANK_WEIGHTS[i] for i, cat in enumerate(priority) if i < len(RANK_WEIGHTS)}
+def _rank_weight_map(travel_items: list[dict]) -> list[float]:
+    sorted_items = sorted(travel_items, key=lambda x: x['rank'])
 
+    weighted_vecs = []
+    for item in sorted_items:
+        weight = RANK_WEIGHTS[item['rank'] - 1] if item['rank'] - 1 < len(RANK_WEIGHTS) else 0.1
+        vec = np.array(get_embedding(item['category']))
+        weighted_vecs.append(vec * weight)
 
-def score_spot(spot: dict, user_vec: list[float], weight_map: dict[str, float]) -> float:
-    cat1 = spot.get("cat1", "")
-    rank_weight = weight_map.get(cat1, 0.1)
+    if not weighted_vecs:
+        return []
 
-    spot_vec = json_to_embedding(spot.get("embedding") or "")
-    if user_vec and spot_vec:
-        sim = cosine_similarity(user_vec, spot_vec)
-    else:
-        sim = 1.0 if cat1 in weight_map else 0.3
-
-    return sim * rank_weight
-
-
-def filter_travel_spots(spots: list[dict], preference: Preference, user_embedding: UserEmbedding, top_n: int = 30) -> list[dict]:
-    weight_map = _rank_weight_map(preference.travel_priority)
-    user_vec = json_to_embedding(user_embedding.travel_embedding or "")
-
-    scored = []
-    for spot in spots:
-        s = score_spot(spot, user_vec, weight_map)
-        scored.append({**spot, "_score": round(s, 4)})
-
-    scored.sort(key=lambda x: x["_score"], reverse=True)
-    logger.info(f"[필터] 여행지 {len(spots)}개 → 상위 {top_n}개 선별")
-    return scored[:top_n]
+    combined = np.sum(weighted_vecs, axis=0)
+    norm = np.linalg.norm(combined)
+    return (combined / norm).tolist() if norm > 0 else []
 
 
 def filter_food_spots(spots: list[dict], user_embedding: UserEmbedding, top_n: int = 20) -> list[dict]:
