@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from app.domain.preference.models.preferenceModel import Preference
 from app.domain.preference.models.userEmbeddingModel import UserEmbedding
 from app.domain.preference.schema.preferenceSchema import PreferenceCreate, PreferenceResponse
-from app.api.embedding.embedding import (
+from app.utils.embedding.embedding import (
     travel_preference_to_text,
     food_preference_to_text,
     accommodation_preference_to_text,
@@ -14,9 +14,51 @@ from app.api.embedding.embedding import (
 
 logger = logging.getLogger(__name__)
 
+#취향 프로필 조회
+def get_preference(db: Session, user_id: int) -> PreferenceResponse:
+    logger.info(f"취향 프로필 조회 - user_id: {user_id}")
 
-def _to_csv(lst: list) -> str:
-    return ','.join(lst) if lst else ''
+    preference = db.query(Preference).filter(Preference.user_id == user_id).first()
+    if preference is None:
+        raise HTTPException(status_code=404, detail="취향 프로필이 없습니다")
+    return preference
+
+#사용자 취향 프로필 여부 조회
+def get_preference_or_none(db: Session, user_id: int):
+    return db.query(Preference).filter(Preference.user_id == user_id).first()
+
+#사용자 취향 프로필 등록 및 백터 생성
+def create_preference(db: Session, user_id: int, data: PreferenceCreate) -> PreferenceResponse:
+    logger.info(f"취향 프로필 생성 - user_id: {user_id}")
+
+    preference = Preference(user_id=user_id)
+    for field, value in data.model_dump().items():
+        setattr(preference, field, _to_csv(value))
+    db.add(preference)
+    db.flush()
+
+    _upsert_embeddings(db, preference)
+
+    db.commit()
+    db.refresh(preference)
+    return preference
+
+#사용자 취향 프로필 수정 맟 백터 수정
+def update_preference(db: Session, user_id: int, data: PreferenceCreate) -> PreferenceResponse:
+    logger.info(f"취향 프로필 수정 - user_id: {user_id}")
+
+    preference = db.query(Preference).filter(Preference.user_id == user_id).first()
+    if preference is None:
+        raise HTTPException(status_code=404, detail="취향 프로필이 없습니다")
+
+    for field, value in data.model_dump().items():
+        setattr(preference, field, _to_csv(value))
+
+    _upsert_embeddings(db, preference)
+
+    db.commit()
+    db.refresh(preference)
+    return preference
 
 
 def _upsert_embeddings(db: Session, preference: Preference) -> None:
@@ -47,48 +89,5 @@ def _upsert_embeddings(db: Session, preference: Preference) -> None:
 
     logger.info(f"[임베딩] 저장 완료 - user_id: {preference.user_id}")
 
-
-def get_preference_or_none(db: Session, user_id: int):
-    return db.query(Preference).filter(Preference.user_id == user_id).first()
-
-
-def create_preference(db: Session, user_id: int, data: PreferenceCreate) -> PreferenceResponse:
-    logger.info(f"취향 프로필 생성 - user_id: {user_id}")
-
-    preference = Preference(user_id=user_id)
-    for field, value in data.model_dump().items():
-        setattr(preference, field, _to_csv(value))
-    db.add(preference)
-    db.flush()
-
-    _upsert_embeddings(db, preference)
-
-    db.commit()
-    db.refresh(preference)
-    return preference
-
-
-def get_preference(db: Session, user_id: int) -> PreferenceResponse:
-    logger.info(f"취향 프로필 조회 - user_id: {user_id}")
-
-    preference = db.query(Preference).filter(Preference.user_id == user_id).first()
-    if preference is None:
-        raise HTTPException(status_code=404, detail="취향 프로필이 없습니다")
-    return preference
-
-
-def update_preference(db: Session, user_id: int, data: PreferenceCreate) -> PreferenceResponse:
-    logger.info(f"취향 프로필 수정 - user_id: {user_id}")
-
-    preference = db.query(Preference).filter(Preference.user_id == user_id).first()
-    if preference is None:
-        raise HTTPException(status_code=404, detail="취향 프로필이 없습니다")
-
-    for field, value in data.model_dump().items():
-        setattr(preference, field, _to_csv(value))
-
-    _upsert_embeddings(db, preference)
-
-    db.commit()
-    db.refresh(preference)
-    return preference
+def _to_csv(lst: list) -> str:
+    return ','.join(lst) if lst else ''
