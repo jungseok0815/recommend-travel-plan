@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from app.domain.trip.models.tripModel import Trip, TripDay, TripSchedule, TripReview, TripParticipant
 from app.domain.trip.schema.tripSchema import TripCreate, TripResponse, TripReviewCreate, ParticipantResponse, TripScheduleUpdate
 from app.domain.user.models.userModel import User
+from app.domain.preference.models.userEmbeddingModel import UserEmbedding
 from app.domain.trip.planner.pipeline.travel_planner import plan_travel
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,7 @@ def create_trip(db: Session, user_id: int, trip_data: TripCreate) -> TripRespons
 
     user = db.query(User).filter(User.id == user_id).first()
     address = user.address or trip_data.destination
+    user_embedding = db.query(UserEmbedding).filter(UserEmbedding.user_id == user_id).first()
 
     trip = Trip(
         user_id        = user_id,
@@ -55,6 +57,7 @@ def create_trip(db: Session, user_id: int, trip_data: TripCreate) -> TripRespons
             endDate        = trip_data.end_datetime,
             address        = address,
             transport_mode = trip_data.transport,
+            user_embedding = user_embedding,
         )
         _save_ai_schedule(db, trip, ai_result, trip_data.budget)
     except Exception as e:

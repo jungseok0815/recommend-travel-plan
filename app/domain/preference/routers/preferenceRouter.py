@@ -1,9 +1,9 @@
 import logging
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.domain.preference.schema.preferenceSchema import PreferenceCreate, PreferenceResponse
-from app.domain.preference.services.preferenceService import create_preference, get_preference, update_preference
+from app.domain.preference.services.preferenceService import create_preference, get_preference, update_preference, get_preference_or_none
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +14,8 @@ router = APIRouter(prefix="/preference")
 def create(request: Request, preference_data: PreferenceCreate, db: Session = Depends(get_db)):
     user_id = request.state.user_id
     logger.info(f"POST /preference - user_id: {user_id}")
+    if get_preference_or_none(db, int(user_id)):
+        raise HTTPException(status_code=400, detail="이미 취향 프로필이 존재합니다")
     return create_preference(db, int(user_id), preference_data)
 
 

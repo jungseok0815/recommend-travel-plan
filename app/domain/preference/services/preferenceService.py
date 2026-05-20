@@ -48,12 +48,12 @@ def _upsert_embeddings(db: Session, preference: Preference) -> None:
     logger.info(f"[임베딩] 저장 완료 - user_id: {preference.user_id}")
 
 
+def get_preference_or_none(db: Session, user_id: int):
+    return db.query(Preference).filter(Preference.user_id == user_id).first()
+
+
 def create_preference(db: Session, user_id: int, data: PreferenceCreate) -> PreferenceResponse:
     logger.info(f"취향 프로필 생성 - user_id: {user_id}")
-    logger.info(f"취향 프로필 데이터 - data: {data}")
-
-    if db.query(Preference).filter(Preference.user_id == user_id).first():
-        raise HTTPException(status_code=400, detail="이미 취향 프로필이 존재합니다")
 
     preference = Preference(user_id=user_id)
     for field, value in data.model_dump().items():

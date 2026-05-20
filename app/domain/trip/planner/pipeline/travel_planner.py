@@ -6,6 +6,7 @@ from google import genai
 from app.core.config import GEMINI_API_KEY
 from app.domain.trip.planner.pipeline.data_collector import collect_travel_data
 from app.domain.trip.planner.pipeline.prompt_builder import build_prompt
+from app.domain.preference.services.preferenceFilter import filter_food_spots, filter_accommodations
 
 # Anthropic 클라이언트 (주석 처리)
 # client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -20,11 +21,18 @@ DEFAULT_SYSTEM_PROMPT = """
 타임라인 형식으로 제공해주세요
 """
 
-def plan_travel(area_name: str, startDate: str, endDate: str, address: str, transport_mode: str) -> dict:
+def plan_travel(area_name: str, startDate: str, endDate: str, address: str, transport_mode: str, user_embedding=None) -> dict:
     # 1. 데이터 수집
     data = collect_travel_data(area_name)
 
-    # 2. 프롬프트 생성
+    # 2. 벡터화 정보가 있으면 사용자 취향 기반 필터링
+    if user_embedding:
+        if data.get("음식점"):
+            data["음식점"] = filter_food_spots(data["음식점"], user_embedding)
+        if data.get("숙박"):
+            data["숙박"] = filter_accommodations(data["숙박"], user_embedding)
+
+    # 3. 프롬프트 생성
     prompt = build_prompt(area_name, startDate, endDate, address, transport_mode, data)
 
     # Anthropic 단건 호출 (주석 처리)

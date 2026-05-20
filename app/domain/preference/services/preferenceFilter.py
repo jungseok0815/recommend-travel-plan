@@ -1,5 +1,5 @@
 import logging
-from app.api.embedding.embedding import json_to_embedding, cosine_similarity
+from app.utils.embedding import json_to_embedding, cosine_similarity
 from app.domain.preference.models.userEmbeddingModel import UserEmbedding
 from app.domain.preference.models.preferenceModel import Preference
 
